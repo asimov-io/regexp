@@ -76,6 +76,8 @@ let t8 = Dot(
   )
 ), "abc"
 
+let t9 = Star(Symb 'a'), ['a'; 'a']
+
 let _ = test t1
 let _ = test t2
 let _ = test t3
@@ -84,3 +86,4 @@ let _ = test t5
 let _ = test t6
 let _ = test t7
 let _ = test t8
+let _ = test t9

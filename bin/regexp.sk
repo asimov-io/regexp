@@ -29,6 +29,7 @@ type expr =
   | Symb symb
   | Plus (expr, expr)
   | Dot (expr, expr)
+  | Star expr
 
 type m<a> = a
 
@@ -63,5 +64,15 @@ val eval ((e: expr), (w: word)) : result =
     let (w1, w2) =@ cut w in
     let _ =@ eval (e1, w1) in
     let _ =@ eval (e2, w2) in
+    ret ()
+  or
+    let Star _ =@ e in
+    let _ = isempty w in
+    ret ()
+  or
+    let Star e1 =@ e in
+    let (w1, w2) =@ cut w in
+    let _ =@ eval (e1, w1) in
+    let _ =@ eval (e, w2) in
     ret ()
   end
