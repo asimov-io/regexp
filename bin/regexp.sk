@@ -9,7 +9,6 @@ val isempty : word → ()
 val head : word → lett
 val tail : word → word
 
-
 type expr =
   | Empty
   | Symb symb
@@ -22,7 +21,6 @@ val ret (v: ()): m<()> = return<()> v
 
 val bind<a, b> ((w: m<a>), (f: a → m<b>)) : m<b> =
   f w
-
 
 type result = m<()>
 
