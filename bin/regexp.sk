@@ -20,8 +20,8 @@ type m<a> = a
 val return<a> (v: a) : m<a> = v
 val ret (v: ()): m<()> = return<()> v
 
-val bind<a, b> ((w: m<a>), (f: a → m<b>)) : m<b> =
-  f w
+val bind<a, b> ((w: m<a>), (g: a → m<b>)) : m<b> =
+  g w
 
 
 type result = m<()>
