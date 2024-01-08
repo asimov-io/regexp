@@ -78,6 +78,21 @@ let t8 = Dot(
 
 let t9 = Star(Symb 'a'), "aa"
 let t10 = Star(Star(Symb 'a')), "aa"
+let e11 = 
+  Star(
+    Dot(
+      Star(
+        Plus(
+          Star(Symb 'a'),
+          Symb 'b'
+        )
+      ),
+      Symb 'c'
+    )
+  )
+
+let t11 = e11, "abba"
+let t12 = e11, "abccaac"
 
 let _ = test t1
 let _ = test t2
@@ -89,3 +104,5 @@ let _ = test t7
 let _ = test t8
 let _ = test t9
 let _ = test t10
+let _ = test t11
+let _ = test t12

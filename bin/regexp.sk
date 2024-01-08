@@ -12,16 +12,23 @@ val tail : word → word
 val cons : (lett, word) → word
 
 
-val cut (w: word) : (word, word) =
+val cut_dot (w: word) : (word, word) =
   branch
     (eps, w)
   or
     let l =@ head w in
     let t =@ tail w in
-    let (t1, t2) =@ cut t in
+    let (t1, t2) =@ cut_dot t in
     let t1' = cons (l, t1) in
     (t1', t2)
   end
+
+val cut_star (w: word) : (word, word) =
+  let l =@ head w in
+  let t =@ tail w in
+  let (t1, t2) =@ cut_dot t in
+  let t1' = cons (l, t1) in
+  (t1', t2)
 
 
 type expr =
@@ -61,7 +68,7 @@ val eval ((e: expr), (w: word)) : result =
     ret ()
   or
     let Dot (e1, e2) =@ e in
-    let (w1, w2) =@ cut w in
+    let (w1, w2) =@ cut_dot w in
     let _ =@ eval (e1, w1) in
     let _ =@ eval (e2, w2) in
     ret ()
@@ -71,7 +78,7 @@ val eval ((e: expr), (w: word)) : result =
     ret ()
   or
     let Star e1 =@ e in
-    let (w1, w2) =@ cut w in
+    let (w1, w2) =@ cut_star w in
     let _ =@ eval (e1, w1) in
     let _ =@ eval (e, w2) in
     ret ()
