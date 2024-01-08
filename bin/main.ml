@@ -39,28 +39,31 @@ open MakeInterpreter(Spec)
 
 let testnb = ref 0
 
+let to_list (w : string) = List.init (String.length w) (String.get w)
+
 let test t =
   incr testnb;
   Printf.printf "\nTEST n°%d:\n" (!testnb);
-  let l = eval t in
+  let e, w = t in
+  let w_list = to_list w in
+  let l = eval (e, w_list) in
   match l with
     | [] -> Printf.printf "Non reconnu\n"
     | _ -> Printf.printf "Reconnu de %d façons\n" (List.length l)
 
+let t1 = Plus(Plus(Symb 'a', Symb 'b'), Symb 'c'), "c"
 
-let t1 = Plus(Plus(Symb 'a', Symb 'b'), Symb 'c'), ['c']
+let t2 = Plus(Symb 'a', Symb 'b'), "c"
 
-let t2 = Plus(Symb 'a', Symb 'b'), ['c']
+let t3 = Plus(Plus(Symb 'a', Symb 'b'), Symb 'a'), "a"
 
-let t3 = Plus(Plus(Symb 'a', Symb 'b'), Symb 'a'), ['a']
+let t4 = Dot(Symb 'a', Symb 'b'), "ab"
 
-let t4 = Dot(Symb 'a', Symb 'b'), ['a'; 'b']
+let t5 = Dot(Symb 'a', Symb 'b'), "a"
 
-let t5 = Dot(Symb 'a', Symb 'b'), ['a']
+let t6 = Dot(Plus(Symb 'a', Symb 'a'), Symb 'b'), "ab"
 
-let t6 = Dot(Plus(Symb 'a', Symb 'a'), Symb 'b'), ['a'; 'b']
-
-let t7 = Dot(Dot(Symb 'a', Symb 'b'), Symb 'c'), ['a'; 'b'; 'c']
+let t7 = Dot(Dot(Symb 'a', Symb 'b'), Symb 'c'), "abc"
 
 let t8 = Dot(
   Plus(
@@ -71,7 +74,7 @@ let t8 = Dot(
     Symb 'c',
     Dot(Symb 'b', Symb 'c')
   )
-), ['a'; 'b'; 'c']
+), "abc"
 
 let _ = test t1
 let _ = test t2
