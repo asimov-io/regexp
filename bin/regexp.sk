@@ -3,36 +3,45 @@ type lett
 type word
 
 val lett_of_symb : symb → lett
-val equal : (symb, lett) → bool
+val equal : (symb, lett) → ()
 
 val isempty : word → ()
 val head : word → lett
 val tail : word → word
+
 
 type expr =
   | Empty
   | Symb symb
   | Plus (expr, expr)
 
-type bool =
-  | True
-  | False
+type m<a> = a
 
-type result = bool
+val return<a> (v: a) : m<a> = v
+val ret (v: ()): m<()> = return<()> v
+
+val bind<a, b> ((w: m<a>), (f: a → m<b>)) : m<b> =
+  f w
+
+
+type result = m<()>
+
+binder @ = bind
 
 val eval ((e: expr), (w: word)) : result =
-  match (e, w) with
-  | (Empty, _) → False
-  | (Symb s, w) →
-    let l = head w in
-    let t = tail w in
-    let isempty t in
-    equal (s, l)
-  | (Symb _, _) → False
-  | (Plus (e1, e2), w) →
-    let r1 = eval (e1, w) in
-    match r1 with
-    | True → True
-    | False → eval (e2, w)
-    end
+  branch
+    let Symb s =@ e in
+    let l =@ head w in
+    let t =@ tail w in
+    let _ =@ isempty t in
+    let _ =@ equal (s, l) in
+    ret ()
+  or
+    let Plus (e1, _) =@ e in
+    let _ =@ eval (e1, w) in
+    ret ()
+  or
+    let Plus (_, e2) =@ e in
+    let _ =@ eval (e2, w) in
+    ret ()
   end
