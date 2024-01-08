@@ -34,11 +34,13 @@ open MakeInterpreter(Spec)
 
 
 let test t =
-  let _ = M.extract (eval t) in
-  Printf.printf "Reconnu\n"
+  let l = eval t in
+  match l with
+    | [] -> Printf.printf "Non reconnu\n"
+    | _ -> Printf.printf "Reconnu\n"
 
 
-let t1 = Plus(Plus(Symb 'a', Symb 'b'), Symb 'c'), ['d']
+let t1 = Plus(Plus(Symb 'a', Symb 'b'), Symb 'c'), ['c']
 
 
 let _ = test t1
