@@ -1,0 +1,13 @@
+(executable
+ (public_name regexp)
+ (name main)
+ (libraries necroml))
+
+(rule
+    (target regexp.ml)
+    (deps regexp.sk)
+    (action (run necroml -o %{target} %{deps})))
+
+(env
+    (dev
+        (flags (:standard -w -39 -w -33 -w -34 -w -32 -w -27))))

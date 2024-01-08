@@ -1,0 +1,38 @@
+type symb
+type lett
+type word
+
+val lett_of_symb : symb → lett
+val equal : (symb, lett) → bool
+
+val isempty : word → ()
+val head : word → lett
+val tail : word → word
+
+type expr =
+  | Empty
+  | Symb symb
+  | Plus (expr, expr)
+
+type bool =
+  | True
+  | False
+
+type result = bool
+
+val eval ((e: expr), (w: word)) : result =
+  match (e, w) with
+  | (Empty, _) → False
+  | (Symb s, w) →
+    let l = head w in
+    let t = tail w in
+    let isempty t in
+    equal (s, l)
+  | (Symb _, _) → False
+  | (Plus (e1, e2), w) →
+    let r1 = eval (e1, w) in
+    match r1 with
+    | True → True
+    | False → eval (e2, w)
+    end
+  end
