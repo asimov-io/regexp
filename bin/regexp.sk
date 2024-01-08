@@ -5,14 +5,30 @@ type word
 val lett_of_symb : symb → lett
 val equal : (symb, lett) → ()
 
+val eps : word
 val isempty : word → ()
 val head : word → lett
 val tail : word → word
+val cons : (lett, word) → word
+
+
+val cut (w: word) : (word, word) =
+  branch
+    (eps, w)
+  or
+    let l =@ head w in
+    let t =@ tail w in
+    let (t1, t2) =@ cut t in
+    let t1' = cons (l, t1) in
+    (t1', t2)
+  end
+
 
 type expr =
   | Empty
   | Symb symb
   | Plus (expr, expr)
+  | Dot (expr, expr)
 
 type m<a> = a
 
@@ -41,5 +57,11 @@ val eval ((e: expr), (w: word)) : result =
   or
     let Plus (_, e2) =@ e in
     let _ =@ eval (e2, w) in
+    ret ()
+  or
+    let Dot (e1, e2) =@ e in
+    let (w1, w2) =@ cut w in
+    let _ =@ eval (e1, w1) in
+    let _ =@ eval (e2, w2) in
     ret ()
   end
