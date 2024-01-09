@@ -61,9 +61,7 @@ let string_of_elt e = match e with
   | TrStarR -> "}"
 
 let string_of_trace tr =
-  Printf.sprintf "[%s]"
-  (String.concat " " (List.map string_of_elt (list_of_trace tr)))
-
+  String.concat "" (List.map string_of_elt (list_of_trace tr))
 
 let testnb = ref 0
 let test t =
@@ -74,7 +72,11 @@ let test t =
   let l = eval (e, w) in
   match l with
     | [] -> Printf.printf "Non reconnu\n"
-    | _ -> Printf.printf "Reconnu de %d façons\n" (List.length l)
+    | _ ->
+      Printf.printf "Reconnu de %d façon(s):\n" (List.length l);
+      List.iter
+        (fun x -> print_endline (string_of_trace (snd x)))
+        l
 
 let t1 = Plus(Plus(Symb 'a', Symb 'b'), Symb 'c'), "c"
 
@@ -128,6 +130,8 @@ let t14 = Eps, ""
 
 let t15 = Eps, "a"
 
+let t16 = Dot(Star(Symb 'a'), Star(Symb 'a')), "aa"
+
 let _ = test t1
 let _ = test t2
 let _ = test t3
@@ -143,3 +147,4 @@ let _ = test t12
 let _ = test t13
 let _ = test t14
 let _ = test t15
+let _ = test t16

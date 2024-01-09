@@ -115,7 +115,5 @@ val eval ((e: expr), (w: word)) : result =
     log (TrStarL);@
     eval (e1, w1);@
     log (TrStarR);@
-    log (TrStarL);@
-    eval (e, w2);@
-    log (TrStarR)
+    eval (e, w2)
   end
