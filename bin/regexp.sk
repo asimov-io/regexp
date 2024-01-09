@@ -58,9 +58,10 @@ type trace =
 
 
 type m<a> = (a, trace)
+type result = m<word>
 
 val return<a> (v: a) : m<a> = (v, Nil)
-val ret (v: ()): m<()> = return<()> v
+val ret (v: word): result = return<word> v
 
 val bind<a, b> ((w: m<a>), (f: a → m<b>)) : m<b> =
   let (v, tr) = w in
@@ -70,32 +71,34 @@ val bind<a, b> ((w: m<a>), (f: a → m<b>)) : m<b> =
 val log (e:tr_elt) : m<()> =
   ((), Elt e)
 
-type result = m<()>
-
 binder @ = bind
 
 val eval ((e: expr), (w: word)) : result =
   branch
     let Eps = e in
     eval (Star(Empty), w);@
-    log (TrEps)
+    log (TrEps);@
+    ret w
   or
     let Symb s = e in
     let l = head w in
     let t = tail w in
     isempty t;
     equal (s, l);
-    log (TrSymb s)
+    log (TrSymb s);@
+    ret w
   or
     let Or (e1, _) = e in
     log (TrOrL);@
     eval (e1, w);@
-    log (TrOrEnd)
+    log (TrOrEnd);@
+    ret w
   or
     let Or (_, e2) = e in
     log (TrOrR);@
     eval (e2, w);@
-    log (TrOrEnd)
+    log (TrOrEnd);@
+    ret w
   or
     let Dot (e1, e2) = e in
     let (w1, w2) = cut_dot w in
@@ -104,16 +107,18 @@ val eval ((e: expr), (w: word)) : result =
     log (TrDotR);@
     log (TrDotL);@
     eval (e2, w2);@
-    log (TrDotR)
+    log (TrDotR);@
+    ret w
   or
     let Star _ = e in
     isempty w;
-    ret ()
+    ret w
   or
     let Star e1 = e in
     let (w1, w2) = cut_star w in
     log (TrStarL);@
     eval (e1, w1);@
     log (TrStarR);@
-    eval (e, w2)
+    eval (e, w2);@
+    ret w
   end
