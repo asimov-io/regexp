@@ -36,7 +36,34 @@ end
 
 open MakeInterpreter(Spec)
 
-let to_list (w : string) = List.init (String.length w) (String.get w)
+let word_of_string (s : string) = List.init (String.length s) (String.get s)
+
+let list_of_trace tr =
+  let rec aux acc tr =
+    match tr with
+    | Nil -> acc
+    | Elt e -> e :: acc
+    | Conc (tr1, tr2) ->
+      let acc2 = aux acc tr2 in
+      aux acc2 tr1
+  in
+  aux [] tr
+
+let string_of_elt e = match e with
+  | TrEps -> Printf.sprintf "ε"
+  | TrSymb s -> Printf.sprintf "%c" s
+  | TrPlusL -> "L("
+  | TrPlusR -> "R("
+  | TrPlusEnd -> ")"
+  | TrDotL -> "("
+  | TrDotR -> ")"
+  | TrStarL -> "{"
+  | TrStarR -> "}"
+
+let string_of_trace tr =
+  Printf.sprintf "[%s]"
+  (String.concat " " (List.map string_of_elt (list_of_trace tr)))
+
 
 let testnb = ref 0
 let test t =

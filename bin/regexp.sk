@@ -16,17 +16,17 @@ val cut_dot (w: word) : (word, word) =
   branch
     (eps, w)
   or
-    let l =@ head w in
-    let t =@ tail w in
-    let (t1, t2) =@ cut_dot t in
+    let l = head w in
+    let t = tail w in
+    let (t1, t2) = cut_dot t in
     let t1' = cons (l, t1) in
     (t1', t2)
   end
 
 val cut_star (w: word) : (word, word) =
-  let l =@ head w in
-  let t =@ tail w in
-  let (t1, t2) =@ cut_dot t in
+  let l = head w in
+  let t = tail w in
+  let (t1, t2) = cut_dot t in
   let t1' = cons (l, t1) in
   (t1', t2)
 
@@ -39,13 +39,36 @@ type expr =
   | Dot (expr, expr)
   | Star expr
 
-type m<a> = a
 
-val return<a> (v: a) : m<a> = v
+type tr_elt =
+  | TrEps
+  | TrSymb symb
+  | TrPlusL
+  | TrPlusR
+  | TrPlusEnd
+  | TrDotL
+  | TrDotR
+  | TrStarL
+  | TrStarR
+
+type trace =
+  | Nil
+  | Elt tr_elt
+  | Conc (trace, trace)
+
+
+type m<a> = (a, trace)
+
+val return<a> (v: a) : m<a> = (v, Nil)
 val ret (v: ()): m<()> = return<()> v
 
 val bind<a, b> ((w: m<a>), (f: a → m<b>)) : m<b> =
-  f w
+  let (v, tr) = w in
+  let (v', tr') = f v in
+  (v', Conc(tr, tr'))
+
+val log (e:tr_elt) : m<()> =
+  ((), Elt e)
 
 type result = m<()>
 
@@ -53,31 +76,46 @@ binder @ = bind
 
 val eval ((e: expr), (w: word)) : result =
   branch
-    let Eps =@ e in
-    eval (Star(Empty), w)
+    let Eps = e in
+    eval (Star(Empty), w);@
+    log (TrEps)
   or
-    let Symb s =@ e in
-    let l =@ head w in
-    let t =@ tail w in
-    isempty t;@
-    equal (s, l)
+    let Symb s = e in
+    let l = head w in
+    let t = tail w in
+    isempty t;
+    equal (s, l);
+    log (TrSymb s)
   or
-    let Plus (e1, _) =@ e in
-    eval (e1, w)
+    let Plus (e1, _) = e in
+    log (TrPlusL);@
+    eval (e1, w);@
+    log (TrPlusEnd)
   or
-    let Plus (_, e2) =@ e in
-    eval (e2, w)
+    let Plus (_, e2) = e in
+    log (TrPlusR);@
+    eval (e2, w);@
+    log (TrPlusEnd)
   or
-    let Dot (e1, e2) =@ e in
-    let (w1, w2) =@ cut_dot w in
+    let Dot (e1, e2) = e in
+    let (w1, w2) = cut_dot w in
+    log (TrDotL);@
     eval (e1, w1);@
-    eval (e2, w2)
+    log (TrDotR);@
+    log (TrDotL);@
+    eval (e2, w2);@
+    log (TrDotR)
   or
-    let Star _ =@ e in
-    isempty w
+    let Star _ = e in
+    isempty w;
+    ret ()
   or
-    let Star e1 =@ e in
-    let (w1, w2) =@ cut_star w in
+    let Star e1 = e in
+    let (w1, w2) = cut_star w in
+    log (TrStarL);@
     eval (e1, w1);@
-    eval (e, w2)
+    log (TrStarR);@
+    log (TrStarL);@
+    eval (e, w2);@
+    log (TrStarR)
   end
