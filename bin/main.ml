@@ -2,10 +2,14 @@ open Regexp
 
 module M = Necromonads.List
 
+module IMap = Map.Make(Stdlib.Int)
+
 module Types = struct
   type symb = char
   type lett = char
   type word = lett list
+  type loc = int
+  type heap = word IMap.t * int
 end
 
 module Spec = struct
@@ -32,6 +36,9 @@ module Spec = struct
   let isempty (w: word) = match w with
     | [] -> M.ret ()
     | _ -> M.fail ()
+  
+  let empty_heap : heap =
+    IMap.empty, 0
 end
 
 open MakeInterpreter(Spec)
@@ -69,13 +76,14 @@ let test t =
   Printf.printf "\nTEST n°%d:\n" (!testnb);
   let e, s = t in
   let w = word_of_string s in
-  let l = eval (e, w) in
+  let l = exec (e, w) in
   match l with
     | [] -> Printf.printf "Non reconnu\n"
     | _ ->
       Printf.printf "Reconnu de %d façon(s):\n" (List.length l);
       List.iter
-        (fun x -> print_endline (string_of_trace (snd x)))
+        (fun x -> let (_, tr, h) = x in
+          print_endline (string_of_trace tr))
         l
 
 let t1 = Or(Or(Symb 'a', Symb 'b'), Symb 'c'), "c"

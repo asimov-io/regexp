@@ -11,7 +11,6 @@ val head : word → lett
 val tail : word → word
 val cons : (lett, word) → word
 
-
 val cut_dot (w: word) : (word, word) =
   branch
     (eps, w)
@@ -57,19 +56,26 @@ type trace =
   | Conc (trace, trace)
 
 
-type m<a> = (a, trace)
+type loc
+type heap
+
+val empty_heap : heap
+
+type m<a> = heap → (a, trace, heap)
 type result = m<word>
 
-val return<a> (v: a) : m<a> = (v, Nil)
+val return<a> (v: a) : m<a> = λ (_:heap) → (v, Nil, empty_heap)
 val ret (v: word): result = return<word> v
 
 val bind<a, b> ((w: m<a>), (f: a → m<b>)) : m<b> =
-  let (v, tr) = w in
-  let (v', tr') = f v in
-  (v', Conc(tr, tr'))
+  λ (h: heap) →
+  let (va, tra, ha) = w h in
+  let wb = f va in
+  let (vb, trb, hb) = wb ha in
+  (vb, Conc(tra, trb), hb)
 
 val log (e:tr_elt) : m<()> =
-  ((), Elt e)
+  λ (h: heap) → ((), Elt e, h)
 
 binder @ = bind
 
@@ -122,3 +128,8 @@ val eval ((e: expr), (w: word)) : result =
     eval (e, w2);@
     ret w
   end
+
+
+val exec ((e: expr), (w: word)) : (word, trace, heap) =
+  let w = eval (e, w) in
+  w empty_heap
