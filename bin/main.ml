@@ -9,7 +9,7 @@ module Types = struct
   type lett = char
   type word = lett list
   type loc = int
-  type heap = word IMap.t * int
+  type heap = (word option) IMap.t * int
 end
 
 module Spec = struct
@@ -39,6 +39,21 @@ module Spec = struct
   
   let empty_heap : heap =
     IMap.empty, 0
+
+  let alloc (m, ln) =
+    let m' = IMap.add ln None m in
+    M.ret (ln, (m', ln + 1))
+
+  let set (l, v, (m, ln)) =
+    let m' = IMap.add l (Some v) m in
+    M.ret (m', ln)
+
+  let get (l, (m, _)) =
+    let vo = IMap.find l m in
+    match vo with
+      | None -> M.fail ()
+      | Some v -> M.ret v
+  
 end
 
 open MakeInterpreter(Spec)

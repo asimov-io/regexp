@@ -55,11 +55,13 @@ type trace =
   | Elt tr_elt
   | Conc (trace, trace)
 
-
 type loc
 type heap
 
 val empty_heap : heap
+val alloc : heap → (loc, heap)
+val set : (loc, word, heap) → heap
+val get : (loc, heap) → word
 
 type m<a> = heap → (a, trace, heap)
 type result = m<word>
