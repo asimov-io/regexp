@@ -69,9 +69,9 @@ let testnb = ref 0
 let test t =
   incr testnb;
   Printf.printf "\nTEST n°%d:\n" (!testnb);
-  let e, w = t in
-  let w_list = word_of_string w in
-  let l = eval (e, w_list) in
+  let e, s = t in
+  let w = word_of_string s in
+  let l = eval (e, w) in
   match l with
     | [] -> Printf.printf "Non reconnu\n"
     | _ -> Printf.printf "Reconnu de %d façons\n" (List.length l)
