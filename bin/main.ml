@@ -52,9 +52,9 @@ let list_of_trace tr =
 let string_of_elt e = match e with
   | TrEps -> Printf.sprintf "ε"
   | TrSymb s -> Printf.sprintf "%c" s
-  | TrPlusL -> "L("
-  | TrPlusR -> "R("
-  | TrPlusEnd -> ")"
+  | TrOrL -> "L("
+  | TrOrR -> "R("
+  | TrOrEnd -> ")"
   | TrDotL -> "("
   | TrDotR -> ")"
   | TrStarL -> "{"
@@ -78,26 +78,26 @@ let test t =
         (fun x -> print_endline (string_of_trace (snd x)))
         l
 
-let t1 = Plus(Plus(Symb 'a', Symb 'b'), Symb 'c'), "c"
+let t1 = Or(Or(Symb 'a', Symb 'b'), Symb 'c'), "c"
 
-let t2 = Plus(Symb 'a', Symb 'b'), "c"
+let t2 = Or(Symb 'a', Symb 'b'), "c"
 
-let t3 = Plus(Plus(Symb 'a', Symb 'b'), Symb 'a'), "a"
+let t3 = Or(Or(Symb 'a', Symb 'b'), Symb 'a'), "a"
 
 let t4 = Dot(Symb 'a', Symb 'b'), "ab"
 
 let t5 = Dot(Symb 'a', Symb 'b'), "a"
 
-let t6 = Dot(Plus(Symb 'a', Symb 'a'), Symb 'b'), "ab"
+let t6 = Dot(Or(Symb 'a', Symb 'a'), Symb 'b'), "ab"
 
 let t7 = Dot(Dot(Symb 'a', Symb 'b'), Symb 'c'), "abc"
 
 let t8 = Dot(
-  Plus(
+  Or(
     Dot(Symb 'a', Symb 'b'),
     Symb 'a'
   ),
-  Plus(
+  Or(
     Symb 'c',
     Dot(Symb 'b', Symb 'c')
   )
@@ -111,7 +111,7 @@ let e11 =
   Star(
     Dot(
       Star(
-        Plus(
+        Or(
           Star(Symb 'a'),
           Symb 'b'
         )
@@ -124,7 +124,7 @@ let t11 = e11, "abba"
 
 let t12 = e11, "abccaac"
 
-let t13 = Star(Star(Symb 'a')), "aaaaaa"
+let t13 = Star(Star(Symb 'a')), "aaaa"
 
 let t14 = Eps, ""
 

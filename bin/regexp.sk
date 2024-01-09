@@ -35,7 +35,7 @@ type expr =
   | Empty
   | Eps
   | Symb symb
-  | Plus (expr, expr)
+  | Or (expr, expr)
   | Dot (expr, expr)
   | Star expr
 
@@ -43,9 +43,9 @@ type expr =
 type tr_elt =
   | TrEps
   | TrSymb symb
-  | TrPlusL
-  | TrPlusR
-  | TrPlusEnd
+  | TrOrL
+  | TrOrR
+  | TrOrEnd
   | TrDotL
   | TrDotR
   | TrStarL
@@ -87,15 +87,15 @@ val eval ((e: expr), (w: word)) : result =
     equal (s, l);
     log (TrSymb s)
   or
-    let Plus (e1, _) = e in
-    log (TrPlusL);@
+    let Or (e1, _) = e in
+    log (TrOrL);@
     eval (e1, w);@
-    log (TrPlusEnd)
+    log (TrOrEnd)
   or
-    let Plus (_, e2) = e in
-    log (TrPlusR);@
+    let Or (_, e2) = e in
+    log (TrOrR);@
     eval (e2, w);@
-    log (TrPlusEnd)
+    log (TrOrEnd)
   or
     let Dot (e1, e2) = e in
     let (w1, w2) = cut_dot w in
