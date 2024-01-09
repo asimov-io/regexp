@@ -43,7 +43,7 @@ let test t =
   incr testnb;
   Printf.printf "\nTEST n°%d:\n" (!testnb);
   let e, w = t in
-  let w_list = to_list w in
+  let w_list = word_of_string w in
   let l = eval (e, w_list) in
   match l with
     | [] -> Printf.printf "Non reconnu\n"
