@@ -97,6 +97,10 @@ let t12 = e11, "abccaac"
 
 let t13 = Star(Star(Symb 'a')), "aaaaaa"
 
+let t14 = Eps, ""
+
+let t15 = Eps, "a"
+
 let _ = test t1
 let _ = test t2
 let _ = test t3
@@ -110,3 +114,5 @@ let _ = test t10
 let _ = test t11
 let _ = test t12
 let _ = test t13
+let _ = test t14
+let _ = test t15

@@ -33,6 +33,7 @@ val cut_star (w: word) : (word, word) =
 
 type expr =
   | Empty
+  | Eps
   | Symb symb
   | Plus (expr, expr)
   | Dot (expr, expr)
@@ -52,34 +53,31 @@ binder @ = bind
 
 val eval ((e: expr), (w: word)) : result =
   branch
+    let Eps =@ e in
+    eval (Star(Empty), w)
+  or
     let Symb s =@ e in
     let l =@ head w in
     let t =@ tail w in
-    let _ =@ isempty t in
-    let _ =@ equal (s, l) in
-    ret ()
+    isempty t;@
+    equal (s, l)
   or
     let Plus (e1, _) =@ e in
-    let _ =@ eval (e1, w) in
-    ret ()
+    eval (e1, w)
   or
     let Plus (_, e2) =@ e in
-    let _ =@ eval (e2, w) in
-    ret ()
+    eval (e2, w)
   or
     let Dot (e1, e2) =@ e in
     let (w1, w2) =@ cut_dot w in
-    let _ =@ eval (e1, w1) in
-    let _ =@ eval (e2, w2) in
-    ret ()
+    eval (e1, w1);@
+    eval (e2, w2)
   or
     let Star _ =@ e in
-    let _ = isempty w in
-    ret ()
+    isempty w
   or
     let Star e1 =@ e in
     let (w1, w2) =@ cut_star w in
-    let _ =@ eval (e1, w1) in
-    let _ =@ eval (e, w2) in
-    ret ()
+    eval (e1, w1);@
+    eval (e, w2)
   end
