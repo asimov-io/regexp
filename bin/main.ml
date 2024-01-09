@@ -16,7 +16,7 @@ module Spec = struct
   let equal ((s: symb), (l: lett)) =
     if (s = l) then M.ret () else M.fail ()
 
-  let eps = []
+  let eps : word = []
 
   let head (w: word) = match w with
     | [] -> M.fail ()
@@ -36,11 +36,9 @@ end
 
 open MakeInterpreter(Spec)
 
-
-let testnb = ref 0
-
 let to_list (w : string) = List.init (String.length w) (String.get w)
 
+let testnb = ref 0
 let test t =
   incr testnb;
   Printf.printf "\nTEST n°%d:\n" (!testnb);
