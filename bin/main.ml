@@ -2,14 +2,14 @@ open Regexp
 
 module M = Necromonads.List
 
-module IMap = Map.Make(Stdlib.Int)
+module CMap = Map.Make(Stdlib.Int)
 
 module Types = struct
   type symb = char
   type lett = char
   type word = lett list
-  type loc = int
-  type heap = (word option) IMap.t * int
+  type cap = int
+  type heap = (word option) CMap.t * cap
 end
 
 module Spec = struct
@@ -38,21 +38,21 @@ module Spec = struct
     | _ -> M.fail ()
   
   let empty_heap : heap =
-    IMap.empty, 0
+    CMap.empty, 0
 
-  let alloc (m, ln) =
-    let m' = IMap.add ln None m in
-    M.ret (ln, (m', ln + 1))
+  let alloc (cm, nc) =
+    let cm' = CMap.add nc None cm in
+    M.ret (nc, (cm', nc + 1))
 
-  let set (l, v, (m, ln)) =
-    let m' = IMap.add l (Some v) m in
-    M.ret (m', ln)
+  let set (c, w, (cm, nc)) =
+    let cm' = CMap.add c (Some w) cm in
+    M.ret (cm', nc)
 
-  let get (l, (m, _)) =
-    let vo = IMap.find l m in
-    match vo with
+  let get (c, (cm, _)) =
+    let wo = CMap.find c cm in
+    match wo with
       | None -> M.fail ()
-      | Some v -> M.ret v
+      | Some w -> M.ret w
   
 end
 
@@ -64,14 +64,14 @@ let list_of_trace tr =
   let rec aux acc tr =
     match tr with
     | Nil -> acc
-    | Elt e -> e :: acc
+    | Elt te -> te :: acc
     | Conc (tr1, tr2) ->
       let acc2 = aux acc tr2 in
       aux acc2 tr1
   in
   aux [] tr
 
-let string_of_elt e = match e with
+let string_of_elt te = match te with
   | TrEps -> Printf.sprintf "ε"
   | TrSymb s -> Printf.sprintf "%c" s
   | TrOrL -> "L("
@@ -91,23 +91,22 @@ let test t =
   Printf.printf "\nTEST n°%d:\n" (!testnb);
   let e, s = t in
   let w = word_of_string s in
-  let l = exec (e, w) in
-  match l with
+  let res = exec (e, w) in
+  match res with
     | [] -> Printf.printf "Non reconnu\n"
     | _ ->
-      Printf.printf "Reconnu de %d façon(s):\n" (List.length l);
+      Printf.printf "Reconnu de %d façon(s):\n" (List.length res);
       List.iter
-        (fun x -> let (_, tr, (m, ln)) = x in
+        (fun (_, tr, (cm, nc)) ->
           print_endline (string_of_trace tr);
-          print_int ln;
-          for i=0 to (ln-1) do
+          for i=0 to (nc-1) do
             Printf.printf "Groupe %d:\n" i;
-            match (IMap.find i m) with
+            match (CMap.find i cm) with
               | None -> ()
               | Some w -> List.iter (fun l -> print_char l) w
           done
         )
-        l
+        res
 
 let t1 = Or(Or(Symb 'a', Symb 'b'), Symb 'c'), "c"
 
