@@ -97,8 +97,16 @@ let test t =
     | _ ->
       Printf.printf "Reconnu de %d façon(s):\n" (List.length l);
       List.iter
-        (fun x -> let (_, tr, h) = x in
-          print_endline (string_of_trace tr))
+        (fun x -> let (_, tr, (m, ln)) = x in
+          print_endline (string_of_trace tr);
+          print_int ln;
+          for i=0 to (ln-1) do
+            Printf.printf "Groupe %d:\n" i;
+            match (IMap.find i m) with
+              | None -> ()
+              | Some w -> List.iter (fun l -> print_char l) w
+          done
+        )
         l
 
 let t1 = Or(Or(Symb 'a', Symb 'b'), Symb 'c'), "c"
@@ -155,6 +163,8 @@ let t15 = Eps, "a"
 
 let t16 = Dot(Star(Symb 'a'), Star(Symb 'a')), "aa"
 
+let t17 = Group(Symb 'a'), "a"
+
 let _ = test t1
 let _ = test t2
 let _ = test t3
@@ -171,3 +181,4 @@ let _ = test t13
 let _ = test t14
 let _ = test t15
 let _ = test t16
+let _ = test t17

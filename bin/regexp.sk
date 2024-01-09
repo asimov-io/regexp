@@ -37,6 +37,7 @@ type expr =
   | Or (expr, expr)
   | Dot (expr, expr)
   | Star expr
+  | Group expr
 
 
 type tr_elt =
@@ -129,6 +130,14 @@ val eval ((e: expr), (w: word)) : result =
     log (TrStarR);@
     eval (e, w2);@
     ret w
+  or
+    let Group e1 = e in
+    λ (h: heap) →
+    let (l, h') = alloc h in
+    let x = eval (e1, w) in
+    let (w2, tr, h'') = x h' in
+    let h''' = set (l, w2, h'') in
+    (w2, tr, h''')
   end
 
 
