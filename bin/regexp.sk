@@ -66,7 +66,7 @@ val get : (loc, heap) → word
 type m<a> = heap → (a, trace, heap)
 type result = m<word>
 
-val return<a> (v: a) : m<a> = λ (_:heap) → (v, Nil, empty_heap)
+val return<a> (v: a) : m<a> = λ (h:heap) → (v, Nil, h)
 val ret (v: word): result = return<word> v
 
 val bind<a, b> ((w: m<a>), (f: a → m<b>)) : m<b> =
