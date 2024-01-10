@@ -56,29 +56,29 @@ type trace =
   | Elt tr_elt
   | Conc (trace, trace)
 
-type loc
+type cap
 type heap
 
 val empty_heap : heap
-val alloc : heap → (loc, heap)
-val set : (loc, word, heap) → heap
-val get : (loc, heap) → word
+val alloc : heap → (cap, heap)
+val set : (cap, word, heap) → heap
+val get : (cap, heap) → word
 
 type m<a> = heap → (a, trace, heap)
 type result = m<word>
 
 val return<a> (v: a) : m<a> = λ (h:heap) → (v, Nil, h)
-val ret (v: word): result = return<word> v
+val ret (w: word): result = return<word> w
 
-val bind<a, b> ((w: m<a>), (f: a → m<b>)) : m<b> =
+val bind<a, b> ((x: m<a>), (f: a → m<b>)) : m<b> =
   λ (h: heap) →
-  let (va, tra, ha) = w h in
-  let wb = f va in
-  let (vb, trb, hb) = wb ha in
+  let (va, tra, ha) = x h in
+  let xb = f va in
+  let (vb, trb, hb) = xb ha in
   (vb, Conc(tra, trb), hb)
 
-val log (e:tr_elt) : m<()> =
-  λ (h: heap) → ((), Elt e, h)
+val log (te:tr_elt) : m<()> =
+  λ (h: heap) → ((), Elt te, h)
 
 binder @ = bind
 
@@ -133,14 +133,14 @@ val eval ((e: expr), (w: word)) : result =
   or
     let Group e1 = e in
     λ (h: heap) →
-    let (l, h') = alloc h in
+    let (c, h') = alloc h in
     let x = eval (e1, w) in
     let (w2, tr, h'') = x h' in
-    let h''' = set (l, w2, h'') in
+    let h''' = set (c, w2, h'') in
     (w2, tr, h''')
   end
 
 
 val exec ((e: expr), (w: word)) : (word, trace, heap) =
-  let w = eval (e, w) in
-  w empty_heap
+  let x = eval (e, w) in
+  x empty_heap
