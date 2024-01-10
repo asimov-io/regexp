@@ -77,10 +77,12 @@ let string_of_elt te = match te with
   | TrOrL -> "L("
   | TrOrR -> "R("
   | TrOrEnd -> ")"
-  | TrDotL -> "("
-  | TrDotR -> ")"
+  | TrParL -> "("
+  | TrParR -> ")"
   | TrStarL -> "{"
   | TrStarR -> "}"
+  | TrGroupL c -> Printf.sprintf "\\%d[" c
+  | TrGroupR c -> "]"
 
 let string_of_trace tr =
   String.concat "" (List.map string_of_elt (list_of_trace tr))
@@ -104,6 +106,8 @@ let test t =
             match (CMap.find i cm) with
               | None -> ()
               | Some w -> List.iter (fun l -> print_char l) w
+            ;
+            Printf.printf "\n"
           done
         )
         res
@@ -123,7 +127,7 @@ let t3 = Or(Or(Symb 'a', Symb 'b'), Symb 'a'), "a"
 *)
 let t4 = Dot(Symb 'a', Symb 'b'), "ab"
 (*
-    a • a
+    a • b
 *)
 let t5 = Dot(Symb 'a', Symb 'b'), "a"
 (*
@@ -196,9 +200,11 @@ let t17 = Group(Symb 'a'), "a"
 (*
     [a]
 *)
-
 let t18 = Dot(Symb 'a', Group (Dot(Symb 'b', Dot(Group (Symb 'c'), Dot(Symb 'd', Group(Symb 'e')))))), "abcde"
-
+(*
+    a • [b [c] d [e]]
+*)
+let t19 = Dot(Star (Symb 'a'), Star (Symb 'a')), "aaa"
 let _ = test t1
 let _ = test t2
 let _ = test t3
@@ -217,3 +223,4 @@ let _ = test t15
 let _ = test t16
 let _ = test t17
 let _ = test t18
+let _ = test t19

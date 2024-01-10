@@ -37,6 +37,7 @@ type expr =
   | Or (expr, expr)
   | Dot (expr, expr)
   | Star expr
+  | StarLight expr
   | Group expr
 
 
@@ -46,10 +47,12 @@ type tr_elt =
   | TrOrL
   | TrOrR
   | TrOrEnd
-  | TrDotL
-  | TrDotR
+  | TrParL
+  | TrParR
   | TrStarL
   | TrStarR
+  | TrGroupL cap
+  | TrGroupR cap
 
 type trace =
   | Nil
@@ -66,13 +69,13 @@ val get : (cap, heap) → word
 
 val newcap () : m<cap> =
   λ (h: heap) →
-  let (c, h') = alloc h in
-  (c, Nil, h')
+  let (nc, h') = alloc h in
+  (nc, Elt (TrGroupL nc), h')
 
 val setcap ((c: cap), (w: word)): result =
   λ (h: heap) →
   let h' = set (c, w, h) in
-  (w, Nil, h')
+  (w, Elt (TrGroupR c), h')
 
 type m<a> = heap → (a, trace, heap)
 type result = m<word>
@@ -96,7 +99,7 @@ val eval ((e: expr), (w: word)) : result =
   branch
     let Eps = e in
     eval (Star(Empty), w);@
-    log (TrEps);@
+    log TrEps;@
     ret w
   or
     let Symb s = e in
@@ -108,25 +111,23 @@ val eval ((e: expr), (w: word)) : result =
     ret w
   or
     let Or (e1, _) = e in
-    log (TrOrL);@
+    log TrOrL;@
     eval (e1, w);@
-    log (TrOrEnd);@
+    log TrParR;@
     ret w
   or
     let Or (_, e2) = e in
-    log (TrOrR);@
+    log TrOrR;@
     eval (e2, w);@
-    log (TrOrEnd);@
+    log TrParR;@
     ret w
   or
     let Dot (e1, e2) = e in
     let (w1, w2) = cut_dot w in
-    log (TrDotL);@
+    log TrParL;@
     eval (e1, w1);@
-    log (TrDotR);@
-    log (TrDotL);@
     eval (e2, w2);@
-    log (TrDotR);@
+    log TrParR;@
     ret w
   or
     let Star _ = e in
@@ -135,9 +136,23 @@ val eval ((e: expr), (w: word)) : result =
   or
     let Star e1 = e in
     let (w1, w2) = cut_star w in
-    log (TrStarL);@
+    log TrParL;@
+    log TrStarL;@
     eval (e1, w1);@
-    log (TrStarR);@
+    log TrStarR;@
+    eval (StarLight e1, w2);@
+    log TrParR;@
+    ret w
+  or
+    let StarLight _ = e in
+    isempty w;
+    ret w
+  or
+    let StarLight e1 = e in
+    let (w1, w2) = cut_star w in
+    log TrStarL;@
+    eval (e1, w1);@
+    log TrStarR;@
     eval (e, w2);@
     ret w
   or
