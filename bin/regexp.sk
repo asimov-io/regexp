@@ -177,6 +177,7 @@ val eval ((e: expr), (w: word)) : result =
   end
 
 
-val exec ((e: expr), (w: word)) : (word, trace, heap) =
+val exec ((e: expr), (w: word)) : (trace, heap) =
   let x = eval (e, w) in
-  x empty_heap
+  let (_, tr, h) = x empty_heap in
+  (tr, h)

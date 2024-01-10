@@ -106,7 +106,7 @@ let test t =
     | _ ->
       Printf.printf "Reconnu de %d façon(s):\n" (List.length res);
       List.iter
-        (fun (_, tr, (cm, nc)) ->
+        (fun (tr, (cm, nc)) ->
           print_endline (string_of_trace tr);
           for i=0 to (nc-1) do
             Printf.printf "Groupe %d:\n" i;
