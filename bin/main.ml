@@ -110,19 +110,34 @@ let test t =
         l
 
 let t1 = Or(Or(Symb 'a', Symb 'b'), Symb 'c'), "c"
-
+(*
+    (a | b) | c                      
+*)
 let t2 = Or(Symb 'a', Symb 'b'), "c"
+(*
+    a | b
+*)
 
 let t3 = Or(Or(Symb 'a', Symb 'b'), Symb 'a'), "a"
-
+(*
+    (a | b) | a
+*)
 let t4 = Dot(Symb 'a', Symb 'b'), "ab"
-
+(*
+    a • a
+*)
 let t5 = Dot(Symb 'a', Symb 'b'), "a"
-
+(*
+    a • b
+*)
 let t6 = Dot(Or(Symb 'a', Symb 'a'), Symb 'b'), "ab"
-
+(*
+    (a | a) • b
+*)
 let t7 = Dot(Dot(Symb 'a', Symb 'b'), Symb 'c'), "abc"
-
+(*
+    (a • b) • c
+*)
 let t8 = Dot(
   Or(
     Dot(Symb 'a', Symb 'b'),
@@ -133,11 +148,17 @@ let t8 = Dot(
     Dot(Symb 'b', Symb 'c')
   )
 ), "abc"
-
+(*
+    (a • b | a) • (c | b • c)
+*)
 let t9 = Star(Symb 'a'), "aa"
-
+(*
+    a*
+*)
 let t10 = Star(Star(Symb 'a')), "aa"
-
+(*
+    a**
+*)
 let e11 = 
   Star(
     Dot(
@@ -150,21 +171,32 @@ let e11 =
       Symb 'c'
     )
   )
-
+(*
+    ((a* | b)* • c)*
+*)
 let t11 = e11, "abba"
-
 let t12 = e11, "abccaac"
 
 let t13 = Star(Star(Symb 'a')), "aaaa"
-
+(*
+    a**
+*)
 let t14 = Eps, ""
-
+(*
+    ε
+*)
 let t15 = Eps, "a"
-
+(*
+    ε
+*)
 let t16 = Dot(Star(Symb 'a'), Star(Symb 'a')), "aa"
-
+(*
+    a* • a*
+*)
 let t17 = Group(Symb 'a'), "a"
-
+(*
+    [a]
+*)
 let _ = test t1
 let _ = test t2
 let _ = test t3
