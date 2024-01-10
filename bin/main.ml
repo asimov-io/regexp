@@ -164,6 +164,8 @@ let t16 = Dot(Star(Symb 'a'), Star(Symb 'a')), "aa"
 
 let t17 = Group(Symb 'a'), "a"
 
+let t18 = Dot(Symb 'a', Group (Dot(Symb 'b', Dot(Group (Symb 'c'), Dot(Symb 'd', Group(Symb 'e')))))), "abcde"
+
 let _ = test t1
 let _ = test t2
 let _ = test t3
@@ -181,3 +183,4 @@ let _ = test t14
 let _ = test t15
 let _ = test t16
 let _ = test t17
+let _ = test t18
