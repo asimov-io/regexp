@@ -263,6 +263,30 @@ let t29 = Dot(Plus(Symb 'a'), Plus(Symb 'a')), "aaa"
 (*
     a+ a+
 *)
+let e30 = Dot(Or(Group(Symb 'a'), Symb 'a'), Dot(Group(Symb 'b'), Ref 0))
+(*
+    ([a] | a) [b] \0
+*)
+let t30 = e30, "aba"
+let t31 = e30, "abb"
+let t32 = Dot(Star(Group(Symb 'a')), Dot(Symb 'a', Ref 0)), "aaa"
+(*
+    [a]* a \0
+*)
+let e33 = Dot(Option(Symb 'a'), Symb 'b')
+(*
+    a? b
+*)
+let t33 = e33, "b"
+let t34 = e33, "ab"
+let e35 = Dot(Or(Group(Symb 'a'), Symb 'c'), Dot(Group(Symb 'b'), Option(Ref 0)))
+(*
+    ([a] | c) [b] (\0)?
+*)
+let t35 = e35, "ab"
+let t36 = e35, "cb"
+let t37 = e35, "aba"
+let t38 = e35, "cbb"
 
 let _ = test t1
 let _ = test t2
@@ -293,3 +317,12 @@ let _ = test t26
 let _ = test t27
 let _ = test t28
 let _ = test t29
+let _ = test t30
+let _ = test t31
+let _ = test t32
+let _ = test t33
+let _ = test t34
+let _ = test t35
+let _ = test t36
+let _ = test t37
+let _ = test t38

@@ -46,6 +46,7 @@ type expr =
   | Plus expr
   | Exp (expr, nat)
   | ExpLight (expr, nat)
+  | Option expr
   | Group expr
   | Ref cap
 
@@ -158,9 +159,9 @@ val eval ((e: expr), (w: word)) : result =
     log TrParR;@
     ret (e1'', w)
   or
-    let StarLight e' = e in
+    let StarLight e1 = e in
     isempty w;
-    ret (Star e', w)
+    ret (Star e1, w)
   or
     let StarLight e1 = e in
     let (w1, w2) = cut_star w in
@@ -196,10 +197,10 @@ val eval ((e: expr), (w: word)) : result =
     log TrParR;@
     ret (e1'', w)
   or
-    let ExpLight (e', n) = e in
+    let ExpLight (e1, n) = e in
     isz n;
     eval (StarLight(Empty), w);@
-    ret (Exp (e', n), w)
+    ret (Exp (e1, n), w)
   or
     let ExpLight (e1, n) = e in
     let (w1, w2) = cut_dot w in
@@ -209,6 +210,14 @@ val eval ((e: expr), (w: word)) : result =
     let pn = pred n in
     let (e1'', _) =@ eval (ExpLight (e1', pn), w2) in
     ret (e1'', w)
+  or
+    let Option _ = e in
+    eval (Eps, w);@
+    ret (e, w)
+  or
+    let Option e1 = e in
+    let (e1', _) =@ eval (e1, w) in
+    ret (Option e1', w)
   or
     let Group e1 = e in
     let nc =@ newcap () in
