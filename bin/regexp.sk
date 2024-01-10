@@ -75,21 +75,21 @@ val newcap () : m<cap> =
   let (nc, h') = alloc h in
   (nc, Elt (TrGroupL nc), h')
 
-val setcap ((c: cap), (w: word)): result =
+val setcap ((c: cap), (e: expr), (w: word)): result =
   λ (h: heap) →
   let h' = set (c, w, h) in
-  (w, Elt (TrGroupR), h')
+  ((e, w), Elt (TrGroupR), h')
 
-val getcap (c: cap) : result =
+val getcap ((c: cap), (e: expr)) : result =
   λ (h: heap) →
   let wcap = get (c, h) in
-  (wcap, Nil, h)
+  ((e, wcap), Nil, h)
 
 type m<a> = heap → (a, trace, heap)
-type result = m<word>
+type result = m<(expr, word)>
 
 val return<a> (v: a) : m<a> = λ (h:heap) → (v, Nil, h)
-val ret (w: word): result = return<word> w
+val ret ((e: expr), (w: word)): result = return<(expr, word)> (e, w)
 
 val bind<a, b> ((x: m<a>), (f: a → m<b>)) : m<b> =
   λ (h: heap) →
@@ -108,7 +108,7 @@ val eval ((e: expr), (w: word)) : result =
     let Eps = e in
     eval (Star(Empty), w);@
     log TrEps;@
-    ret w
+    ret (e, w)
   or
     let Symb s = e in
     let l = head w in
@@ -116,64 +116,64 @@ val eval ((e: expr), (w: word)) : result =
     isempty t;
     equal (s, l);
     log (TrSymb s);@
-    ret w
+    ret (e, w)
   or
-    let Or (e1, _) = e in
+    let Or (e1, e2) = e in
     log TrOrL;@
-    eval (e1, w);@
+    let (e1', _) =@ eval (e1, w) in
     log TrParR;@
-    ret w
+    ret (Or (e1', e2), w)
   or
-    let Or (_, e2) = e in
+    let Or (e1, e2) = e in
     log TrOrR;@
-    eval (e2, w);@
+    let (e2', _) =@ eval (e2, w) in
     log TrParR;@
-    ret w
+    ret (Or (e1, e2'), w)
   or
     let Dot (e1, e2) = e in
     let (w1, w2) = cut_dot w in
     log TrParL;@
-    eval (e1, w1);@
-    eval (e2, w2);@
+    let (e1', _) =@ eval (e1, w1) in
+    let (e2', _) =@ eval (e2, w2) in
     log TrParR;@
-    ret w
+    ret (Dot (e1', e2'), w)
   or
     let Star _ = e in
     isempty w;
-    ret w
+    ret (e, w)
   or
     let Star e1 = e in
     let (w1, w2) = cut_star w in
     log TrParL;@
     log TrStarL;@
-    eval (e1, w1);@
+    let (e1', _) =@ eval (e1, w1) in
     log TrStarR;@
-    eval (StarLight e1, w2);@
+    let (e1'', _) =@ eval (StarLight e1', w2) in
     log TrParR;@
-    ret w
+    ret (e1'', w)
   or
-    let StarLight _ = e in
+    let StarLight e' = e in
     isempty w;
-    ret w
+    ret (Star e', w)
   or
     let StarLight e1 = e in
     let (w1, w2) = cut_star w in
     log TrStarL;@
-    eval (e1, w1);@
+    let (e1', _) =@ eval (e1, w1) in
     log TrStarR;@
-    eval (e, w2);@
-    ret w
+    let (e1'', _) =@ eval (StarLight e1', w2) in
+    ret (e1'', w)
   or
     let Group e1 = e in
     let nc =@ newcap () in
     eval (e1, w);@
-    setcap (nc, w)
+    setcap (nc, e1, w)
   or 
     let Ref c = e in
-    let wcap =@ getcap c in
+    let (_, wcap) =@ getcap (c, e) in
     wrdcmp (w, wcap);
     log (TrRef (c, wcap));@
-    ret w
+    ret (e, w)
   end
 
 

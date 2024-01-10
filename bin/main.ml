@@ -219,10 +219,23 @@ let t20 = Dot(Group(Symb 'a'), Dot(Ref 0, Symb 'b')), "aab"
 (*
     [a] \0 b
 *)
-let t21 = Star(Or(Dot(Ref 0, Symb 'a'), Group(Symb 'b'))), "bba"
+let t21 = Star(Group(Or(Dot(Ref 0, Symb 'a'), Symb 'b'))), "bba"
+(*
+    [\0 a | b]*
+*)
+
+let t22 = Star(Star(Group(Symb 'b'))), "bbb"
+(*
+    [b]**
+*)
+
+(*
+let t23 = Star(Or(Dot(Ref 0, Symb 'a'), Group(Symb 'b'))), "bba"
 (*
     (\0 a | [b])*
 *)
+*)
+
 
 let _ = test t1
 let _ = test t2
@@ -245,3 +258,4 @@ let _ = test t18
 let _ = test t19
 let _ = test t20
 let _ = test t21
+let _ = test t22
