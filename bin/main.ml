@@ -54,11 +54,16 @@ module Spec = struct
       | None -> M.fail ()
       | Some w -> M.ret w
   
+  let rec wrdcmp (w1, w2) = match w1, w2 with
+    | [], [] -> M.ret ()
+    | l1 :: t1, l2 :: t2 when l1 = l2 -> wrdcmp (t1, t2)
+    | _ -> M.fail ()
 end
 
 open MakeInterpreter(Spec)
 
 let word_of_string (s : string) = List.init (String.length s) (String.get s)
+let string_of_word (w : word) = String.init (List.length w) (List.nth w)
 
 let list_of_trace tr =
   let rec aux acc tr =
@@ -82,7 +87,9 @@ let string_of_elt te = match te with
   | TrStarL -> "{"
   | TrStarR -> "}"
   | TrGroupL c -> Printf.sprintf "\\%d[" c
-  | TrGroupR c -> "]"
+  | TrGroupR -> "]"
+  | TrRef (c, w) -> Printf.sprintf "\\%d\"%s\"" c (string_of_word w)
+
 
 let string_of_trace tr =
   String.concat "" (List.map string_of_elt (list_of_trace tr))
@@ -105,7 +112,7 @@ let test t =
             Printf.printf "Groupe %d:\n" i;
             match (CMap.find i cm) with
               | None -> ()
-              | Some w -> List.iter (fun l -> print_char l) w
+              | Some w -> print_endline (string_of_word w)
             ;
             Printf.printf "\n"
           done
@@ -205,6 +212,13 @@ let t18 = Dot(Symb 'a', Group (Dot(Symb 'b', Dot(Group (Symb 'c'), Dot(Symb 'd',
     a • [b [c] d [e]]
 *)
 let t19 = Dot(Star (Symb 'a'), Star (Symb 'a')), "aaa"
+(*
+    a* • a*
+*)
+let t20 = Dot(Group(Symb 'a'), Dot(Ref 0, Symb 'b')), "aab"
+(*
+   [a] \0 b
+*)
 let _ = test t1
 let _ = test t2
 let _ = test t3
@@ -224,3 +238,4 @@ let _ = test t16
 let _ = test t17
 let _ = test t18
 let _ = test t19
+let _ = test t20
