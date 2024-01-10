@@ -84,7 +84,6 @@ let string_of_elt te = match te with
   | TrSymb s -> Printf.sprintf "%c" s
   | TrOrL -> "L("
   | TrOrR -> "R("
-  | TrOrEnd -> ")"
   | TrParL -> "("
   | TrParR -> ")"
   | TrStarL -> "{"
@@ -92,7 +91,6 @@ let string_of_elt te = match te with
   | TrGroupL c -> Printf.sprintf "\\%d[" c
   | TrGroupR -> "]"
   | TrRef (c, w) -> Printf.sprintf "\\%d\"%s\"" c (string_of_word w)
-
 
 let string_of_trace tr =
   String.concat "" (List.map string_of_elt (list_of_trace tr))

@@ -48,7 +48,6 @@ type tr_elt =
   | TrSymb symb
   | TrOrL
   | TrOrR
-  | TrOrEnd
   | TrParL
   | TrParR
   | TrStarL
