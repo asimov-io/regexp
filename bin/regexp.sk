@@ -64,6 +64,16 @@ val alloc : heap → (cap, heap)
 val set : (cap, word, heap) → heap
 val get : (cap, heap) → word
 
+val newcap () : m<cap> =
+  λ (h: heap) →
+  let (c, h') = alloc h in
+  (c, Nil, h')
+
+val setcap ((c: cap), (w: word)): result =
+  λ (h: heap) →
+  let h' = set (c, w, h) in
+  (w, Nil, h')
+
 type m<a> = heap → (a, trace, heap)
 type result = m<word>
 
@@ -132,12 +142,9 @@ val eval ((e: expr), (w: word)) : result =
     ret w
   or
     let Group e1 = e in
-    λ (h: heap) →
-    let (c, h') = alloc h in
-    let x = eval (e1, w) in
-    let (w2, tr, h'') = x h' in
-    let h''' = set (c, w2, h'') in
-    (w2, tr, h''')
+    let nc =@ newcap () in
+    eval (e1, w);@
+    setcap (nc, w)
   end
 
 
