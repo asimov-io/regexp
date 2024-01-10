@@ -10,6 +10,7 @@ val isempty : word → ()
 val head : word → lett
 val tail : word → word
 val cons : (lett, word) → word
+val wrdcmp : (word, word) → ()
 
 val cut_dot (w: word) : (word, word) =
   branch
@@ -68,7 +69,7 @@ val empty_heap : heap
 val alloc : heap → (cap, heap)
 val set : (cap, word, heap) → heap
 val get : (cap, heap) → word
-val wrdcmp : (word, word) → ()
+
 
 val newcap () : m<cap> =
   λ (h: heap) →

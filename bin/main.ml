@@ -48,11 +48,14 @@ module Spec = struct
     let cm' = CMap.add c (Some w) cm in
     M.ret (cm', nc)
 
-  let get (c, (cm, _)) =
-    let wo = CMap.find c cm in
-    match wo with
-      | None -> M.fail ()
-      | Some w -> M.ret w
+  let get (c, (cm, nc)) =
+    if c >= nc then
+      M.fail ()
+    else
+      let wo = CMap.find c cm in
+      match wo with
+        | None -> M.fail ()
+        | Some w -> M.ret w
   
   let rec wrdcmp (w1, w2) = match w1, w2 with
     | [], [] -> M.ret ()
@@ -223,17 +226,13 @@ let t21 = Star(Group(Or(Dot(Ref 0, Symb 'a'), Symb 'b'))), "bba"
 (*
     [\0 a | b]*
 *)
-
 let t22 = Star(Star(Group(Symb 'b'))), "bbb"
 (*
     [b]**
 *)
-
-(*
 let t23 = Star(Or(Dot(Ref 0, Symb 'a'), Group(Symb 'b'))), "bba"
 (*
     (\0 a | [b])*
-*)
 *)
 
 
@@ -259,3 +258,4 @@ let _ = test t19
 let _ = test t20
 let _ = test t21
 let _ = test t22
+let _ = test t23
