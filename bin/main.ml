@@ -144,19 +144,19 @@ let t3 = Or(Or(Symb 'a', Symb 'b'), Symb 'a'), "a"
 *)
 let t4 = Dot(Symb 'a', Symb 'b'), "ab"
 (*
-    a • b
+    a b
 *)
 let t5 = Dot(Symb 'a', Symb 'b'), "a"
 (*
-    a • b
+    a b
 *)
 let t6 = Dot(Or(Symb 'a', Symb 'a'), Symb 'b'), "ab"
 (*
-    (a | a) • b
+    (a | a) b
 *)
 let t7 = Dot(Dot(Symb 'a', Symb 'b'), Symb 'c'), "abc"
 (*
-    (a • b) • c
+    (a b) c
 *)
 let t8 = Dot(
   Or(
@@ -169,7 +169,7 @@ let t8 = Dot(
   )
 ), "abc"
 (*
-    (a • b | a) • (c | b • c)
+    (a b | a) (c | b c)
 *)
 let t9 = Star(Symb 'a'), "aa"
 (*
@@ -192,7 +192,7 @@ let e11 =
     )
   )
 (*
-    ((a* | b)* • c)*
+    ((a* | b)* c)*
 *)
 let t11 = e11, "abba"
 let t12 = e11, "abccaac"
@@ -211,7 +211,7 @@ let t15 = Eps, "a"
 *)
 let t16 = Dot(Star(Symb 'a'), Star(Symb 'a')), "aa"
 (*
-    a* • a*
+    a* a*
 *)
 let t17 = Group(Symb 'a'), "a"
 (*
@@ -219,11 +219,11 @@ let t17 = Group(Symb 'a'), "a"
 *)
 let t18 = Dot(Symb 'a', Group (Dot(Symb 'b', Dot(Group (Symb 'c'), Dot(Symb 'd', Group(Symb 'e')))))), "abcde"
 (*
-    a • [b [c] d [e]]
+    a [b [c] d [e]]
 *)
 let t19 = Dot(Star (Symb 'a'), Star (Symb 'a')), "aaa"
 (*
-    a* • a*
+    a* a*
 *)
 let t20 = Dot(Group(Symb 'a'), Dot(Ref 0, Symb 'b')), "aab"
 (*
@@ -249,12 +249,20 @@ let t24 = e24, "aba"
 let t25 = e24, ""
 let t26 = Exp(Symb 'a', 0), ""
 (*
-  (a)^0
+    (a)^0
 *)
 let t27 = Exp(Or(Symb 'a', Eps), 3), "aa"
+(*
+    (a | ε)^3
+*)
 let t28 = Star(Symb 'a'), ""
+(*
+    a*
+*)
 let t29 = Dot(Plus(Symb 'a'), Plus(Symb 'a')), "aaa"
-
+(*
+    a+ a+
+*)
 
 let _ = test t1
 let _ = test t2
