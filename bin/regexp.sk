@@ -31,6 +31,10 @@ val cut_star (w: word) : (word, word) =
   (t1', t2)
 
 
+type nat
+val isz : nat → ()
+val pred : nat → nat
+
 type expr =
   | Empty
   | Eps
@@ -39,6 +43,9 @@ type expr =
   | Dot (expr, expr)
   | Star expr
   | StarLight expr
+  | Plus expr
+  | Exp (expr, nat)
+  | ExpLight (expr, nat)
   | Group expr
   | Ref cap
 
@@ -106,7 +113,6 @@ val eval ((e: expr), (w: word)) : result =
   branch
     let Eps = e in
     eval (Star(Empty), w);@
-    log TrEps;@
     ret (e, w)
   or
     let Symb s = e in
@@ -139,6 +145,7 @@ val eval ((e: expr), (w: word)) : result =
   or
     let Star _ = e in
     isempty w;
+    log TrEps;@
     ret (e, w)
   or
     let Star e1 = e in
@@ -161,6 +168,46 @@ val eval ((e: expr), (w: word)) : result =
     let (e1', _) =@ eval (e1, w1) in
     log TrStarR;@
     let (e1'', _) =@ eval (StarLight e1', w2) in
+    ret (e1'', w)
+  or
+    let Plus e1 = e in
+    let (w1, w2) = cut_star w in
+    log TrParL;@
+    log TrStarL;@
+    let (e1', _) =@ eval (e1, w1) in
+    log TrStarR;@
+    let (e1'', _) =@ eval (StarLight e1', w2) in
+    log TrParR;@
+    ret (e1'', w)
+  or
+    let Exp (_, n) = e in
+    isz n;
+    eval (Eps, w);@
+    ret (e, w)
+  or
+    let Exp (e1, n) = e in
+    let (w1, w2) = cut_dot w in
+    log TrParL;@
+    log TrStarL;@
+    let (e1', _) =@ eval (e1, w1) in
+    log TrStarR;@
+    let pn = pred n in
+    let (e1'', _) =@ eval (ExpLight (e1', pn), w2) in
+    log TrParR;@
+    ret (e1'', w)
+  or
+    let ExpLight (e', n) = e in
+    isz n;
+    eval (StarLight(Empty), w);@
+    ret (Exp (e', n), w)
+  or
+    let ExpLight (e1, n) = e in
+    let (w1, w2) = cut_dot w in
+    log TrStarL;@
+    let (e1', _) =@ eval (e1, w1) in
+    log TrStarR;@
+    let pn = pred n in
+    let (e1'', _) =@ eval (ExpLight (e1', pn), w2) in
     ret (e1'', w)
   or
     let Group e1 = e in

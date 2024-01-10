@@ -9,6 +9,7 @@ module Types = struct
   type lett = char
   type word = lett list
   type cap = int
+  type nat = int
   type heap = (word option) CMap.t * cap
 end
 
@@ -42,8 +43,14 @@ module Spec = struct
     | l1 :: t1, l2 :: t2 when l1 = l2 -> wrdcmp (t1, t2)
     | _ -> M.fail ()
 
+  let isz n = match n with
+    | 0 -> M.ret ()
     | _ -> M.fail ()
   
+  let pred n = match n with
+    | 0 -> M.fail ()
+    | _ -> M.ret (n - 1)
+
   let empty_heap : heap =
     CMap.empty, 0
 
@@ -234,6 +241,19 @@ let t23 = Star(Or(Dot(Ref 0, Symb 'a'), Group(Symb 'b'))), "bba"
 (*
     (\0 a | [b])*
 *)
+let e24 = Plus(Or(Symb 'a', Symb 'b'))
+(*
+    (a | b)+
+*)
+let t24 = e24, "aba"
+let t25 = e24, ""
+let t26 = Exp(Symb 'a', 0), ""
+(*
+  (a)^0
+*)
+let t27 = Exp(Or(Symb 'a', Eps), 3), "aa"
+let t28 = Star(Symb 'a'), ""
+let t29 = Dot(Plus(Symb 'a'), Plus(Symb 'a')), "aaa"
 
 
 let _ = test t1
@@ -259,3 +279,9 @@ let _ = test t20
 let _ = test t21
 let _ = test t22
 let _ = test t23
+let _ = test t24
+let _ = test t25
+let _ = test t26
+let _ = test t27
+let _ = test t28
+let _ = test t29
