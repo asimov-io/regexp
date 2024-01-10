@@ -69,7 +69,6 @@ val alloc : heap → (cap, heap)
 val set : (cap, word, heap) → heap
 val get : (cap, heap) → word
 
-
 val newcap () : m<cap> =
   λ (h: heap) →
   let (nc, h') = alloc h in

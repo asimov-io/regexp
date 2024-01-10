@@ -22,6 +22,10 @@ module Spec = struct
 
   let eps : word = []
 
+  let isempty (w: word) = match w with
+    | [] -> M.ret ()
+    | _ -> M.fail ()
+
   let head (w: word) = match w with
     | [] -> M.fail ()
     | l :: _ -> M.ret l
@@ -32,9 +36,12 @@ module Spec = struct
 
   let cons ((l: lett), (w: word)) =
     M.ret (l :: w)
+  
+  let rec wrdcmp (w1, w2) = match w1, w2 with
+    | [], [] -> M.ret ()
+    | l1 :: t1, l2 :: t2 when l1 = l2 -> wrdcmp (t1, t2)
+    | _ -> M.fail ()
 
-  let isempty (w: word) = match w with
-    | [] -> M.ret ()
     | _ -> M.fail ()
   
   let empty_heap : heap =
@@ -56,11 +63,6 @@ module Spec = struct
       match wo with
         | None -> M.fail ()
         | Some w -> M.ret w
-  
-  let rec wrdcmp (w1, w2) = match w1, w2 with
-    | [], [] -> M.ret ()
-    | l1 :: t1, l2 :: t2 when l1 = l2 -> wrdcmp (t1, t2)
-    | _ -> M.fail ()
 end
 
 open MakeInterpreter(Spec)
