@@ -1,3 +1,5 @@
+regexp.opam
+
 *.annot
 *.cmo
 *.cma
