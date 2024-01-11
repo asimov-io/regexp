@@ -2,7 +2,6 @@ type symb
 type lett
 type word
 
-val lett_of_symb : symb → lett
 val equal : (symb, lett) → ()
 
 val eps : word
@@ -48,7 +47,7 @@ type expr =
   | ExpLight (expr, nat)
   | Option expr
   | Group expr
-  | Ref cap
+  | Ref cref
 
 
 type tr_elt =
@@ -60,36 +59,36 @@ type tr_elt =
   | TrParR
   | TrStarL
   | TrStarR
-  | TrGroupL cap
+  | TrGroupL cref
   | TrGroupR
-  | TrRef (cap, word)
+  | TrRef (cref, word)
 
 type trace =
   | Nil
   | Elt tr_elt
   | Conc (trace, trace)
 
-type cap
+type cref
 type heap
 
 val empty_heap : heap
-val alloc : heap → (cap, heap)
-val set : (cap, word, heap) → heap
-val get : (cap, heap) → word
+val alloc : heap → (cref, heap)
+val set : (cref, word, heap) → heap
+val get : (cref, heap) → word
 
-val newcap () : m<cap> =
+val newref () : m<cref> =
   λ (h: heap) →
-  let (nc, h') = alloc h in
-  (nc, Elt (TrGroupL nc), h')
+  let (nr, h') = alloc h in
+  (nr, Elt (TrGroupL nr), h')
 
-val setcap ((c: cap), (e: expr), (w: word)): result =
+val setref ((r: cref), (e: expr), (w: word)): result =
   λ (h: heap) →
-  let h' = set (c, w, h) in
+  let h' = set (r, w, h) in
   ((e, w), Elt (TrGroupR), h')
 
-val getcap ((c: cap), (e: expr)) : result =
+val getref ((r: cref), (e: expr)) : result =
   λ (h: heap) →
-  let wcap = get (c, h) in
+  let wcap = get (r, h) in
   ((e, wcap), Nil, h)
 
 type m<a> = heap → (a, trace, heap)
@@ -220,14 +219,14 @@ val eval ((e: expr), (w: word)) : result =
     ret (Option e1', w)
   or
     let Group e1 = e in
-    let nc =@ newcap () in
+    let nr =@ newref () in
     eval (e1, w);@
-    setcap (nc, e1, w)
+    setref (nr, e1, w)
   or 
-    let Ref c = e in
-    let (_, wcap) =@ getcap (c, e) in
+    let Ref r = e in
+    let (_, wcap) =@ getref (r, e) in
     wrdcmp (w, wcap);
-    log (TrRef (c, wcap));@
+    log (TrRef (r, wcap));@
     ret (e, w)
   end
 

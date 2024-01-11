@@ -8,15 +8,13 @@ module Types = struct
   type symb = char
   type lett = char
   type word = lett list
-  type cap = int
+  type cref = int
   type nat = int
-  type heap = (word option) CMap.t * cap
+  type heap = (word option) CMap.t * cref
 end
 
 module Spec = struct
   include Unspec(M)(Types)
-
-  let lett_of_symb (s: symb) = M.ret s
 
   let equal ((s: symb), (l: lett)) =
     if (s = l) then M.ret () else M.fail ()
@@ -52,24 +50,21 @@ module Spec = struct
     | _ -> M.ret (n - 1)
 
   let empty_heap : heap =
-    CMap.empty, 0
+    CMap.empty, 1
 
-  let alloc (cm, nc) =
-    let cm' = CMap.add nc None cm in
-    M.ret (nc, (cm', nc + 1))
+  let alloc (cm, nr) =
+    let cm' = CMap.add nr None cm in
+    M.ret (nr, (cm', nr + 1))
 
-  let set (c, w, (cm, nc)) =
-    let cm' = CMap.add c (Some w) cm in
-    M.ret (cm', nc)
+  let set (r, w, (cm, nr)) =
+    let cm' = CMap.add r (Some w) cm in
+    M.ret (cm', nr)
 
-  let get (c, (cm, nc)) =
-    if c >= nc then
-      M.fail ()
-    else
-      let wo = CMap.find c cm in
-      match wo with
-        | None -> M.fail ()
-        | Some w -> M.ret w
+  let get (r, (cm, nr)) =
+    let woo = CMap.find_opt r cm in
+    match woo with
+      | Some (Some w) -> M.ret w
+      | _ -> M.fail ()
 end
 
 open MakeInterpreter(Spec)
@@ -97,9 +92,9 @@ let string_of_elt te = match te with
   | TrParR -> ")"
   | TrStarL -> "{"
   | TrStarR -> "}"
-  | TrGroupL c -> Printf.sprintf "\\%d[" c
+  | TrGroupL r -> Printf.sprintf "\\%d[" r
   | TrGroupR -> "]"
-  | TrRef (c, w) -> Printf.sprintf "\\%d\"%s\"" c (string_of_word w)
+  | TrRef (r, w) -> Printf.sprintf "\\%d\"%s\"" r (string_of_word w)
 
 let string_of_trace tr =
   String.concat "" (List.map string_of_elt (list_of_trace tr))
@@ -116,9 +111,9 @@ let test t =
     | _ ->
       Printf.printf "Reconnu de %d façon(s):\n" (List.length res);
       List.iter
-        (fun (tr, (cm, nc)) ->
+        (fun (tr, (cm, nr)) ->
           print_endline (string_of_trace tr);
-          for i=0 to (nc-1) do
+          for i=1 to nr-1 do
             Printf.printf "Groupe %d:\n" i;
             match (CMap.find i cm) with
               | None -> ()
@@ -225,21 +220,21 @@ let t19 = Dot(Star (Symb 'a'), Star (Symb 'a')), "aaa"
 (*
     a* a*
 *)
-let t20 = Dot(Group(Symb 'a'), Dot(Ref 0, Symb 'b')), "aab"
+let t20 = Dot(Group(Symb 'a'), Dot(Ref 1, Symb 'b')), "aab"
 (*
-    [a] \0 b
+    [a] \1 b
 *)
-let t21 = Star(Group(Or(Dot(Ref 0, Symb 'a'), Symb 'b'))), "bba"
+let t21 = Star(Group(Or(Dot(Ref 1, Symb 'a'), Symb 'b'))), "bba"
 (*
-    [\0 a | b]*
+    [\1 a | b]*
 *)
 let t22 = Star(Star(Group(Symb 'b'))), "bbb"
 (*
     [b]**
 *)
-let t23 = Star(Or(Dot(Ref 0, Symb 'a'), Group(Symb 'b'))), "bba"
+let t23 = Star(Or(Dot(Ref 1, Symb 'a'), Group(Symb 'b'))), "bba"
 (*
-    (\0 a | [b])*
+    (\1 a | [b])*
 *)
 let e24 = Plus(Or(Symb 'a', Symb 'b'))
 (*
@@ -263,15 +258,15 @@ let t29 = Dot(Plus(Symb 'a'), Plus(Symb 'a')), "aaa"
 (*
     a+ a+
 *)
-let e30 = Dot(Or(Group(Symb 'a'), Symb 'a'), Dot(Group(Symb 'b'), Ref 0))
+let e30 = Dot(Or(Group(Symb 'a'), Symb 'a'), Dot(Group(Symb 'b'), Ref 1))
 (*
-    ([a] | a) [b] \0
+    ([a] | a) [b] \1
 *)
 let t30 = e30, "aba"
 let t31 = e30, "abb"
-let t32 = Dot(Star(Group(Symb 'a')), Dot(Symb 'a', Ref 0)), "aaa"
+let t32 = Dot(Star(Group(Symb 'a')), Dot(Symb 'a', Ref 1)), "aaa"
 (*
-    [a]* a \0
+    [a]* a \1
 *)
 let e33 = Dot(Option(Symb 'a'), Symb 'b')
 (*
@@ -279,50 +274,23 @@ let e33 = Dot(Option(Symb 'a'), Symb 'b')
 *)
 let t33 = e33, "b"
 let t34 = e33, "ab"
-let e35 = Dot(Or(Group(Symb 'a'), Symb 'c'), Dot(Group(Symb 'b'), Option(Ref 0)))
+let e35 = Dot(Or(Group(Symb 'a'), Symb 'c'), Dot(Group(Symb 'b'), Option(Ref 1)))
 (*
-    ([a] | c) [b] (\0)?
+    ([a] | c) [b] (\1)?
 *)
 let t35 = e35, "ab"
 let t36 = e35, "cb"
 let t37 = e35, "aba"
 let t38 = e35, "cbb"
 
-let _ = test t1
-let _ = test t2
-let _ = test t3
-let _ = test t4
-let _ = test t5
-let _ = test t6
-let _ = test t7
-let _ = test t8
-let _ = test t9
-let _ = test t10
-let _ = test t11
-let _ = test t12
-let _ = test t13
-let _ = test t14
-let _ = test t15
-let _ = test t16
-let _ = test t17
-let _ = test t18
-let _ = test t19
-let _ = test t20
-let _ = test t21
-let _ = test t22
-let _ = test t23
-let _ = test t24
-let _ = test t25
-let _ = test t26
-let _ = test t27
-let _ = test t28
-let _ = test t29
-let _ = test t30
-let _ = test t31
-let _ = test t32
-let _ = test t33
-let _ = test t34
-let _ = test t35
-let _ = test t36
-let _ = test t37
-let _ = test t38
+
+let tests = 
+  [
+    t1; t2; t3; t4; t5; t6; t7; t8; t9; t10;
+    t11; t12; t13; t14; t15; t16; t17; t18; t19; t20;
+    t21; t22; t23; t24; t25; t26; t27; t28; t29; t30;
+    t31; t32; t33; t34; t35; t36; t37; t38
+  ]
+
+let _ = List.iter test tests
+
