@@ -282,3 +282,5 @@ Une valeur augmentée prend et renvoie un tas car les captures sont globales au 
 Les valeurs contiennent un `word` pour récupérer le ce qui est contenu dans le tas à une référence donnée (`getref`).
 
 Elles contiennent aussi une `expr` qui permet de consommer les constructeurs `Group`: une fois qu’un groupe a été rencontré, on lui alloue une référence qui se tient à disposition pour faire une capture, mais on ne veut pas réallouer une référence la prochaine fois qu’on le rencontrera.
+
+Plus précisément, `Group e` jette `Group` et ne propage que `e`, les autres propagent. Il faut cependant que les `StarLight` redeviennent des `Star` à la fin (au cas de base) pour que quand on repasse dessus (dans le cas $(a^*)^*$) ce soient toujours des `Star` et non des `StarLight` pour bien avoir les parenthèses
