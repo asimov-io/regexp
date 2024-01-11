@@ -126,36 +126,61 @@ let test t =
         )
         res
 
-let t1 = Or(Or(Symb 'a', Symb 'b'), Symb 'c'), "c"
+(* TEST DES EXPRESSIONS RATIONNELLES *)
+
+(*Test de Eps*)
+let t1 = Eps, ""
 (*
-    (a | b) | c                      
+    ε
 *)
-let t2 = Or(Symb 'a', Symb 'b'), "c"
+let t2 = Eps, "a"
+(*
+    ε
+*)
+
+(*Test de Symb*)
+let t3 = Symb 'a', "a"
+(*
+    a
+*)
+let t4 = Symb 'a', "b"
+
+(*Test de Or*)
+let t5 = Or(Symb 'a', Symb 'b'), "a"
 (*
     a | b
 *)
-
-let t3 = Or(Or(Symb 'a', Symb 'b'), Symb 'a'), "a"
+let t6 = Or(Symb 'a', Symb 'b'), "b"
+(*
+    a | b
+*)
+let t7 = Or(Symb 'a', Symb 'b'), "c"
+(*
+    a | b
+*)
+let t8 = Or(Or(Symb 'a', Symb 'b'), Symb 'a'), "a"
 (*
     (a | b) | a
 *)
-let t4 = Dot(Symb 'a', Symb 'b'), "ab"
+
+(*Test de Dot*)
+let t9 = Dot(Symb 'a', Symb 'b'), "ab"
 (*
     a b
 *)
-let t5 = Dot(Symb 'a', Symb 'b'), "a"
+let t10 = Dot(Symb 'a', Symb 'b'), "a"
 (*
     a b
 *)
-let t6 = Dot(Or(Symb 'a', Symb 'a'), Symb 'b'), "ab"
+let t11 = Dot(Or(Symb 'a', Symb 'a'), Symb 'b'), "ab"
 (*
     (a | a) b
 *)
-let t7 = Dot(Dot(Symb 'a', Symb 'b'), Symb 'c'), "abc"
+let t12 = Dot(Dot(Symb 'a', Symb 'b'), Symb 'c'), "abc"
 (*
     (a b) c
 *)
-let t8 = Dot(
+let t13 = Dot(
   Or(
     Dot(Symb 'a', Symb 'b'),
     Symb 'a'
@@ -168,15 +193,25 @@ let t8 = Dot(
 (*
     (a b | a) (c | b c)
 *)
-let t9 = Star(Symb 'a'), "aa"
+
+(*Test de Star*)
+let t14 = Star(Symb 'a'), ""
 (*
     a*
 *)
-let t10 = Star(Star(Symb 'a')), "aa"
+let t15 = Star(Symb 'a'), "aaa"
+(*
+    a*
+*)
+let t16 = Star(Star(Symb 'a')), "aaaa"
 (*
     a**
 *)
-let e11 = 
+let t17 = Dot(Star (Symb 'a'), Star (Symb 'a')), "aaa"
+(*
+    a* a*
+*)
+let e1 = 
   Star(
     Dot(
       Star(
@@ -191,107 +226,122 @@ let e11 =
 (*
     ((a* | b)* c)*
 *)
-let t11 = e11, "abba"
-let t12 = e11, "abccaac"
+let t18 = e1, "abba"
+let t19 = e1, "abccaac"
 
-let t13 = Star(Star(Symb 'a')), "aaaa"
+(* TEST DES CAPTURES *)
+
+(*Test des extensions POSIX*)
+let e2 = Option(Symb 'a')
 (*
-    a**
+    a?
 *)
-let t14 = Eps, ""
+let t20 = e2, "a"
+let t21 = e2, ""
+
+let e3 = Plus(Symb 'a')
 (*
-    ε
+    a⁺
 *)
-let t15 = Eps, "a"
+let t22 = e3, "aaa"
+let t23 = e3, ""
+
+let t24 = Dot(Plus(Symb 'a'), Plus(Symb 'a')), "aaaa"
 (*
-    ε
+    a⁺ a⁺
 *)
-let t16 = Dot(Star(Symb 'a'), Star(Symb 'a')), "aa"
+let t25 = Exp(Symb 'a', 0), ""
 (*
-    a* a*
+    (a)⁰
 *)
-let t17 = Group(Symb 'a'), "a"
+let t26 = Exp(Symb 'a', 4), "aaaa"
+(*
+    (a)⁴
+*)
+let e4 =
+  Exp(
+    Dot(
+      Plus(
+        Or(
+          Option(Symb 'a'),
+          Symb 'b'
+        )
+      ),
+      Symb 'c'
+    ),
+    3
+  )
+(*
+    ((a? | b)⁺ c)³
+*)
+let t27 = e4, "ccc"
+let t28 = e4, "bcbbcbc"
+let t29 = e4, "abacabcc"
+
+(*Test des groupes*)
+let t30 = Group(Symb 'a'), "a"
 (*
     [a]
 *)
-let t18 = Dot(Symb 'a', Group (Dot(Symb 'b', Dot(Group (Symb 'c'), Dot(Symb 'd', Group(Symb 'e')))))), "abcde"
+let t31 = Dot(Symb 'a', Group (Dot(Symb 'b', Dot(Group (Symb 'c'), Dot(Symb 'd', Group(Symb 'e')))))), "abcde"
 (*
     a [b [c] d [e]]
 *)
-let t19 = Dot(Star (Symb 'a'), Star (Symb 'a')), "aaa"
-(*
-    a* a*
-*)
-let t20 = Dot(Group(Symb 'a'), Dot(Ref 1, Symb 'b')), "aab"
-(*
-    [a] \1 b
-*)
-let t21 = Star(Group(Or(Dot(Ref 1, Symb 'a'), Symb 'b'))), "bba"
-(*
-    [\1 a | b]*
-*)
-let t22 = Star(Star(Group(Symb 'b'))), "bbb"
+let t32 = Star(Star(Group(Symb 'b'))), "bbb"
 (*
     [b]**
 *)
-let t23 = Star(Or(Dot(Ref 1, Symb 'a'), Group(Symb 'b'))), "bba"
+
+(*Test des références*)
+let t33 = Dot(Group(Symb 'a'), Ref 1), "aa"
 (*
-    (\1 a | [b])*
+    [a] \1         référence standarde
 *)
-let e24 = Plus(Or(Symb 'a', Symb 'b'))
-(*
-    (a | b)+
-*)
-let t24 = e24, "aba"
-let t25 = e24, ""
-let t26 = Exp(Symb 'a', 0), ""
-(*
-    (a)^0
-*)
-let t27 = Exp(Or(Symb 'a', Eps), 3), "aa"
-(*
-    (a | ε)^3
-*)
-let t28 = Star(Symb 'a'), ""
-(*
-    a*
-*)
-let t29 = Dot(Plus(Symb 'a'), Plus(Symb 'a')), "aaa"
-(*
-    a+ a+
-*)
-let e30 = Dot(Or(Group(Symb 'a'), Symb 'a'), Dot(Group(Symb 'b'), Ref 1))
-(*
-    ([a] | a) [b] \1
-*)
-let t30 = e30, "aba"
-let t31 = e30, "abb"
-let t32 = Dot(Star(Group(Symb 'a')), Dot(Symb 'a', Ref 1)), "aaa"
+let t34 = Dot(Star(Group(Symb 'a')), Dot(Symb 'a', Ref 1)), "aaa"
 (*
     [a]* a \1
 *)
-let e33 = Dot(Option(Symb 'a'), Symb 'b')
+let t35 = Star(Or(Dot(Ref 1, Symb 'a'), Group(Symb 'b'))), "bba"
 (*
-    a? b
+    (\1 a | [b])*  référence anticipée
 *)
-let t33 = e33, "b"
-let t34 = e33, "ab"
-let e35 = Dot(Or(Group(Symb 'a'), Symb 'c'), Dot(Group(Symb 'b'), Option(Ref 1)))
+let t36 = Star(Group(Or(Dot(Ref 1, Symb 'a'), Symb 'b'))), "bba"
+(*
+    [\1 a | b]*    référence imbriquée
+*)
+
+let e5 = Dot(Or(Group(Symb 'a'), Symb 'c'), Dot(Group(Symb 'b'), Option(Ref 1)))
 (*
     ([a] | c) [b] (\1)?
 *)
-let t35 = e35, "ab"
-let t36 = e35, "cb"
-let t37 = e35, "aba"
-let t38 = e35, "cbb"
+let t37 = e5, "ab"
+let t38 = e5, "cb"
+let t39 = e5, "aba"
+let t40 = e5, "cbb"
 
+let t41 =
+  Dot(
+    Group(e4),
+    Dot(
+      Group(e5),
+      Dot(
+        Ref 2,
+        Ref 3
+      )
+    )
+  ),
+  "abacabcc"^"cbabacabcc"^"cbabacabcc"^"b"
+(*
+    [((a? | b)⁺ c)³] [([a] | c) [b] (\1)?] \2 \3
+*)
 
 let tests = 
   [
-    t1; t2; t3; t4; t5; t6; t7; t8; t9; t10;
+     t1;  t2;  t3;  t4;  t5;  t6;  t7;  t8;  t9; t10;
     t11; t12; t13; t14; t15; t16; t17; t18; t19; t20;
     t21; t22; t23; t24; t25; t26; t27; t28; t29; t30;
-    t31; t32; t33; t34; t35; t36; t37; t38
+    t31; t32; t33; t34; t35; t36; t37; t38; t39; t40;
+    t41
   ]
 
 let _ = List.iter test tests
