@@ -66,6 +66,28 @@ b
 ```
 
 
+Comme les groupes sont rencontrés dynamiquement, un groupe non rencontré n’est pas déclaré et est ignoré par le compteur de groupes. C’est une différence avec la sémantique classique des numéros de capture qui sont normalement calculés statiquement (le `c`-ième groupe est celui dont la parenthèse ouvrante est la `c`-ième).
+
+On avait imaginé deux façons d’avoir la sémantique classique:
+- laisser l’utilisateur numéroter les groupes, mais c’est désagréable pour l’utilisateur.
+
+- faire une passe de parsing avant évaluation qui annote les groupes. Une méthode pour faire cela serait d’avoir une fonction qui ne travaille que sur une expression et la parcourt en annotant les groupes. Cela ne nous semblait pas très élégant.
+
+
+C’est pourquoi avec notre sémantique dynamique, la regexp $([a] \mid c) [b] (\backslash 1)?$ peut aussi reconnaître le mot $cbb$, alors qu’avec la sémantique classique elle ne reconnaît que $\{ab, cb, aba\}$:
+```
+let _ = test (Dot(Or(Group(Symb 'a'), Symb 'c'), Dot(Group(Symb 'b'), Option(Ref 1))), "cbb")
+```
+produit le résultat suivant:
+
+```
+Reconnu de 1 façon(s):
+(R(c)(\1[b]\1"b"))
+Groupe 1:
+b
+```
+
+
 
 
 ## Lire un résultat
@@ -128,7 +150,7 @@ Et le langage $L(e)$ dénoté par l'expression $e$ de facon inductive:
 
 où  $L^0 = \{\varepsilon\}$ et pour $n \geq 1, L^n = L \cdot L^{(n-1)}$
 
-Un mot est reconnu par une expression rationnelle s’il est contenu dans le langage dénoté par cette expression.
+Un mot est reconnu par une expression rationnelle s’il appartient dans le langage dénoté par cette expression.
 
 Ici les symboles des expressions rationnelles et des mots sont les mêmes mais nous avons fait le choix de considérer que les données pouvaient être de types différents pour gagner en généricité. Voyons comment nous avons modélisé ceci.
 
