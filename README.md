@@ -100,8 +100,8 @@ b
 - $s$ est reconnu par `Symb(s)` et produit `s`
 - $w$ est reconnu par `Or(e1, e2)` et produit `L(trace)` si $w$ est reconnu par `e1` en produisant `trace`
 - $w$ est reconnu par `Or(e1, e2)` et produit `R(trace)` si $w$ est reconnu par `e2` en produisant `trace`
-- $w_1 w_2$ est reconnu par `Dot(e1, e2)` et produit `(trace1 trace2)` si $w_1$ est reconnu par `e1` en produisant `trace1` et $w_2$ est reconnu par `e2` en produisant `trace2`
-- $w_1\dots w_n$ est reconnu par `Star(e)` ou `Plus(e)` ou `Exp(e, n)` et produit `({trace1}...{tracen})` si $w_i$ est reconnu par `e` en produisant `tracei`
+- $w_1 w_2$ est reconnu par `Dot(e1, e2)` et produit `(trace1⋅trace2)` si $w_1$ est reconnu par `e1` en produisant `trace1` et $w_2$ est reconnu par `e2` en produisant `trace2`
+- $w_1\dots w_n$ est reconnu par `Star(e)` ou `Plus(e)` ou `Exp(e, n)` et produit `({trace1}␣...␣{tracen})` si $w_i$ est reconnu par `e` en produisant `tracei`
 - $w$ est reconnu par `Group(e)` (qui est le `r`-ième groupe rencontré) et produit `\r[trace]` si $w$ est reconnu par `e` (pour la première fois) en produisant `trace`
 - $w$ est reconnu par `Ref(r)` et produit `\r"w"` si $w$ est le mot reconnu par le `r`-ième groupe rencontré: *référence standarde*. Si le `r`-ième groupe a été rencontré mais n’a pas encore reconnu de mot, `Ref(r)` ne peut rien reconnaître: *référence imbriquée*. Si le `r`-ième groupe n’a pas encore été rencontré, il n’a donc pas encore reconnu de mot et `Ref(r)` ne peut rien reconnaître: *référence anticipée* ou *référence illégale*.
 

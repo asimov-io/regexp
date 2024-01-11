@@ -57,8 +57,10 @@ type tr_elt =
   | TrOrR
   | TrParL
   | TrParR
+  | TrDot
   | TrStarL
   | TrStarR
+  | TrEsp
   | TrGroupL cref
   | TrGroupR
   | TrRef (cref, word)
@@ -139,6 +141,7 @@ val eval ((e: expr), (w: word)) : result =
     let (w1, w2) = cut_dot w in
     log TrParL;@
     let (e1', _) =@ eval (e1, w1) in
+    log TrDot;@
     let (e2', _) =@ eval (e2, w2) in
     log TrParR;@
     ret (Dot (e1', e2'), w)
@@ -164,6 +167,7 @@ val eval ((e: expr), (w: word)) : result =
   or
     let StarLight e1 = e in
     let (w1, w2) = cut_star w in
+    log TrEsp;@
     log TrStarL;@
     let (e1', _) =@ eval (e1, w1) in
     log TrStarR;@
@@ -203,6 +207,7 @@ val eval ((e: expr), (w: word)) : result =
   or
     let ExpLight (e1, n) = e in
     let (w1, w2) = cut_dot w in
+    log TrEsp;@
     log TrStarL;@
     let (e1', _) =@ eval (e1, w1) in
     log TrStarR;@

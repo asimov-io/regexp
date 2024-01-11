@@ -90,8 +90,10 @@ let string_of_elt te = match te with
   | TrOrR -> "R("
   | TrParL -> "("
   | TrParR -> ")"
+  | TrDot -> "⋅"
   | TrStarL -> "{"
   | TrStarR -> "}"
+  | TrEsp -> " "
   | TrGroupL r -> Printf.sprintf "\\%d[" r
   | TrGroupR -> "]"
   | TrRef (r, w) -> Printf.sprintf "\\%d\"%s\"" r (string_of_word w)
