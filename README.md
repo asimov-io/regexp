@@ -57,7 +57,7 @@ teste si la regexp $([a] \mid c) [b] (\backslash 1)?$ reconnaît le mot $aba$ et
 
 ```
 Reconnu de 1 façon(s):
-(L(\1[a])(\2[b]\1"a"))
+(L(\1[a])⋅(\2[b]⋅\1"a"))
 Groupe 1:
 a
 
@@ -82,7 +82,7 @@ produit le résultat suivant:
 
 ```
 Reconnu de 1 façon(s):
-(R(c)(\1[b]\1"b"))
+(R(c)⋅(\1[b]⋅\1"b"))
 Groupe 1:
 b
 ```
@@ -118,7 +118,7 @@ b
 - mapping référence de capture → mot capturé (type `CMap.t`): cm
 - prochaine référence de capture (type `cref`): nr
 - tas (type `heap`): h
-- mot optionnel (type `word option`): wo
+- ? optionnel (type `_ option`): ?o
 - entier (type `nat`) : n
 - valeur générique (type `a`): v
 - valeur augmentée (type `m<?>`): x
