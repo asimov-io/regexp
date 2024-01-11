@@ -172,9 +172,9 @@ Ici les symboles des expressions rationnelles et des mots sont les mêmes mais n
 
 Nous avons pris le parti d'avoir une fonction `eval` qui réussit son calcul seulement si le mot est dans le langage et échoue (`fail`) sinon.
 
-Initialement la valeur pure du résultat de `eval` était donc de type `()` puisqu'elle ne comporte que l'information d'une réussite, nous avons dû l’étendre en une valeur pure de type `(expr, word)` pour gérer les captures comme nous le verrons plus tard.
+Initialement la valeur pure du résultat de `eval` était donc de type `()` puisqu'elle ne comporte que l'information d'une réussite, nous avons dû l’étendre en une valeur pure de type `expr` pour gérer les captures comme nous le verrons plus tard.
 
-    result = m<(expr, word)>
+    result = m<expr>
 
 La monade était au départ la monade identité puis nous lui avons ajouté une trace et un tas pour les extensions.
 
@@ -261,7 +261,7 @@ Il faut donc ajouter un constructeur d’expression qui n’apparaît pas dans l
 - des identifiants de capture de type `cref`
 - un tas de type `heap` (qui associe un mot à chaque référence de capture)
 - la monade augmente une valeur pure en une fonction prenant un tas en argument et renvoyant un tas (en plus de la valeur pure et de la trace): `m<a> = heap → (a, trace, heap)`
-- les valeurs pures manipulées sont des `(expr, word)` (au lieu des `()` qui suffisaient pour une valeur booléenne jusqu’alors).
+- les valeurs pures manipulées sont des `expr` (au lieu des `()` qui suffisaient pour une valeur booléenne jusqu’alors).
 
 ## Côté OCaml
 
@@ -289,11 +289,11 @@ récupère le contenu d’une capture
 
 encapsule `alloc` et renvoie la capture nouvellement crée
 
-    setref (cref, expr, word) → result
+    setref (cref, word) → m<()>
 
 encapsule `set` et propage ses arguments
 
-    getref (cref, expr) → result
+    getref (cref) → m<word>
 
 encapsule `get` et renvoie la valeur récupérée.
 
@@ -301,8 +301,6 @@ encapsule `get` et renvoie la valeur récupérée.
 
 Une valeur augmentée prend et renvoie un tas car les captures sont globales au sein d’une expression.
 
-Les valeurs contiennent un `word` pour récupérer le ce qui est contenu dans le tas à une référence donnée (`getref`).
+Les valeurs contiennent une `expr` qui permet de consommer les constructeurs `Group`: une fois qu’un groupe a été rencontré, on lui alloue une référence qui se tient à disposition pour faire une capture, mais on ne veut pas réallouer une référence la prochaine fois qu’on le rencontrera.
 
-Elles contiennent aussi une `expr` qui permet de consommer les constructeurs `Group`: une fois qu’un groupe a été rencontré, on lui alloue une référence qui se tient à disposition pour faire une capture, mais on ne veut pas réallouer une référence la prochaine fois qu’on le rencontrera.
-
-Plus précisément, `Group e` jette `Group` et ne propage que `e`, les autres propagent. Il faut cependant que les `StarLight` redeviennent des `Star` à la fin (au cas de base) pour que quand on repasse dessus (dans le cas $(a^*)^*$) ce soient toujours des `Star` et non des `StarLight` pour bien avoir les parenthèses
+Plus précisément, `Group e` jette `Group` et ne propage que `e`; les autres propagent. Il faut cependant que les `StarLight` redeviennent des `Star` à la fin (au cas de base) pour que quand on repasse dessus (dans le cas $(a^*)^*$ par exemple) ce soient toujours des `Star` et non des `StarLight` pour bien avoir les parenthèses.

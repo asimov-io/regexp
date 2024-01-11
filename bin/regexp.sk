@@ -83,21 +83,21 @@ val newref () : m<cref> =
   let (nr, h') = alloc h in
   (nr, Elt (TrGroupL nr), h')
 
-val setref ((r: cref), (e: expr), (w: word)): result =
+val setref ((r: cref), (w: word)): m<()> =
   λ (h: heap) →
   let h' = set (r, w, h) in
-  ((e, w), Elt (TrGroupR), h')
+  ((), Elt (TrGroupR), h')
 
-val getref ((r: cref), (e: expr)) : result =
+val getref (r: cref) : m<word> =
   λ (h: heap) →
   let wcap = get (r, h) in
-  ((e, wcap), Nil, h)
+  (wcap, Nil, h)
 
 type m<a> = heap → (a, trace, heap)
-type result = m<(expr, word)>
+type result = m<expr>
 
 val return<a> (v: a) : m<a> = λ (h:heap) → (v, Nil, h)
-val ret ((e: expr), (w: word)): result = return<(expr, word)> (e, w)
+val ret (e: expr): result = return<expr> e
 
 val bind<a, b> ((x: m<a>), (f: a → m<b>)) : m<b> =
   λ (h: heap) →
@@ -115,7 +115,7 @@ val eval ((e: expr), (w: word)) : result =
   branch
     let Eps = e in
     eval (Star(Empty), w);@
-    ret (e, w)
+    ret e
   or
     let Symb s = e in
     let l = head w in
@@ -123,116 +123,117 @@ val eval ((e: expr), (w: word)) : result =
     isempty t;
     equal (s, l);
     log (TrSymb s);@
-    ret (e, w)
+    ret e
   or
     let Or (e1, e2) = e in
     log TrOrL;@
-    let (e1', _) =@ eval (e1, w) in
+    let e1' =@ eval (e1, w) in
     log TrParR;@
-    ret (Or (e1', e2), w)
+    ret (Or (e1', e2))
   or
     let Or (e1, e2) = e in
     log TrOrR;@
-    let (e2', _) =@ eval (e2, w) in
+    let e2' =@ eval (e2, w) in
     log TrParR;@
-    ret (Or (e1, e2'), w)
+    ret (Or (e1, e2'))
   or
     let Dot (e1, e2) = e in
     let (w1, w2) = cut_dot w in
     log TrParL;@
-    let (e1', _) =@ eval (e1, w1) in
+    let e1' =@ eval (e1, w1) in
     log TrDot;@
-    let (e2', _) =@ eval (e2, w2) in
+    let e2' =@ eval (e2, w2) in
     log TrParR;@
-    ret (Dot (e1', e2'), w)
+    ret (Dot (e1', e2'))
   or
     let Star _ = e in
     isempty w;
     log TrEps;@
-    ret (e, w)
+    ret e
   or
     let Star e1 = e in
     let (w1, w2) = cut_star w in
     log TrParL;@
     log TrStarL;@
-    let (e1', _) =@ eval (e1, w1) in
+    let e1' =@ eval (e1, w1) in
     log TrStarR;@
-    let (e1'', _) =@ eval (StarLight e1', w2) in
+    let e1'' =@ eval (StarLight e1', w2) in
     log TrParR;@
-    ret (e1'', w)
+    ret e1''
   or
     let StarLight e1 = e in
     isempty w;
-    ret (Star e1, w)
+    ret (Star e1)
   or
     let StarLight e1 = e in
     let (w1, w2) = cut_star w in
     log TrEsp;@
     log TrStarL;@
-    let (e1', _) =@ eval (e1, w1) in
+    let e1' =@ eval (e1, w1) in
     log TrStarR;@
-    let (e1'', _) =@ eval (StarLight e1', w2) in
-    ret (e1'', w)
+    let e1'' =@ eval (StarLight e1', w2) in
+    ret e1''
   or
     let Plus e1 = e in
     let (w1, w2) = cut_star w in
     log TrParL;@
     log TrStarL;@
-    let (e1', _) =@ eval (e1, w1) in
+    let e1' =@ eval (e1, w1) in
     log TrStarR;@
-    let (e1'', _) =@ eval (StarLight e1', w2) in
+    let e1'' =@ eval (StarLight e1', w2) in
     log TrParR;@
-    ret (e1'', w)
+    ret e1''
   or
     let Exp (_, n) = e in
     isz n;
     eval (Eps, w);@
-    ret (e, w)
+    ret e
   or
     let Exp (e1, n) = e in
     let (w1, w2) = cut_dot w in
     log TrParL;@
     log TrStarL;@
-    let (e1', _) =@ eval (e1, w1) in
+    let e1' =@ eval (e1, w1) in
     log TrStarR;@
     let pn = pred n in
-    let (e1'', _) =@ eval (ExpLight (e1', pn), w2) in
+    let e1'' =@ eval (ExpLight (e1', pn), w2) in
     log TrParR;@
-    ret (e1'', w)
+    ret e1''
   or
     let ExpLight (e1, n) = e in
     isz n;
     eval (StarLight(Empty), w);@
-    ret (Exp (e1, n), w)
+    ret (Exp (e1, n))
   or
     let ExpLight (e1, n) = e in
     let (w1, w2) = cut_dot w in
     log TrEsp;@
     log TrStarL;@
-    let (e1', _) =@ eval (e1, w1) in
+    let e1' =@ eval (e1, w1) in
     log TrStarR;@
     let pn = pred n in
-    let (e1'', _) =@ eval (ExpLight (e1', pn), w2) in
-    ret (e1'', w)
+    let e1'' =@ eval (ExpLight (e1', pn), w2) in
+    ret e1''
   or
     let Option _ = e in
     eval (Eps, w);@
-    ret (e, w)
+    ret e
   or
     let Option e1 = e in
-    let (e1', _) =@ eval (e1, w) in
-    ret (Option e1', w)
+    let e1' =@ eval (e1, w) in
+    ret (Option e1')
   or
     let Group e1 = e in
     let nr =@ newref () in
     eval (e1, w);@
-    setref (nr, e1, w)
+    setref (nr, w);@
+    ret e1
   or 
     let Ref r = e in
-    let (_, wcap) =@ getref (r, e) in
+    let wcap =@ getref r in
     wrdcmp (w, wcap);
     log (TrRef (r, wcap));@
-    ret (e, w)
+    ret e
   end
 
 
